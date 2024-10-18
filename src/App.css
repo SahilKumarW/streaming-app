@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-black text-white min-h-screen;
+}
+
+@layer utilities {
+    .bg-custom-gradient {
+      background: linear-gradient(90deg, #1994BB 0%, #32AAA3 100%);
+    }
+    .bg-overlay {
+      background-color: rgba(9, 9, 15, 0.9);
+    }
+    
+  }
+
+  .blur-background {
+    filter: blur(1px); /* Adjust the blur intensity */
+    transition: filter 0.3s ease; /* Smooth transition */
+  }
+  .dashboard_section{
+    width: 100vw;
+    height: 100vh;
+}
+.left_section {
+  width: 300px;
+  height: inherit;
+}
+.right_section {
+  width: 100%;
+}
+
+  
