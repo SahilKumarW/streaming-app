@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
-import CustomInput from '../components/CustomeInput';
+
 import edit from '../assets/edit.svg';
 import arrow from '../assets/arrow.svg';
 import Modal from '../Modals/Modal';
 import { FaCamera } from 'react-icons/fa';
 import profile from "/Assets/profile.png";
-import axios from 'axios'; // Use axios for API requests
+import axios from 'axios';
+import CustomInput from '../components/CustomeInput';
 
 const AddUser = () => {
     // State for managing modal
@@ -22,6 +23,7 @@ const AddUser = () => {
 
     // State for success/error messages
     const [message, setMessage] = useState('');
+    const [messageType, setMessageType] = useState(''); // 'success' or 'error'
 
     // Handle the form submission
     const handleAddUser = async () => {
@@ -39,6 +41,7 @@ const AddUser = () => {
 
             // Assuming response.data contains a success message or user data
             setMessage('User added successfully!');
+            setMessageType('success');
 
             // Optionally, clear the form fields after successful submission
             setFullName('');
@@ -48,9 +51,16 @@ const AddUser = () => {
             setPassword('');
             setConfirmPassword('');
 
+            // Hide the message after 3 seconds
+            setTimeout(() => setMessage(''), 3000);
+
         } catch (error) {
             console.error('Error adding user:', error);
             setMessage('Failed to add user.');
+            setMessageType('error');
+
+            // Hide the message after 3 seconds
+            setTimeout(() => setMessage(''), 3000);
         }
     };
 
@@ -64,6 +74,13 @@ const AddUser = () => {
 
     return (
         <>
+            {/* Success/Error Message */}
+            {message && (
+                <div className={`fixed top-0 left-0 right-0 p-4 text-center ${messageType === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}>
+                    {message}
+                </div>
+            )}
+
             <div className={`flex flex-col justify-center items-center bg-black ${isModalOpen ? 'blur-background' : ''}`}>
                 <p className='text-[28px] leading-[38px] font-semibold text-white mt-8'>Add User</p>
                 <p className='text-[10px] leading-[22px] font-normal text-[#FFFFFF]'>This is lorem ipsum text used for dummy purpose</p>
@@ -95,9 +112,6 @@ const AddUser = () => {
                 >
                     Add User
                 </button>
-
-                {/* Message display */}
-                {message && <p className="text-white mt-4">{message}</p>}
             </div>
 
             {/* Modal */}
@@ -107,3 +121,6 @@ const AddUser = () => {
 };
 
 export default AddUser;
+
+
+
