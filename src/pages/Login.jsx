@@ -21,7 +21,7 @@ const Login = ({ onLogin }) => {
       onLogin(data);
 
       // Navigate to the dashboard after successful login
-      navigate("/dashboard");
+      navigate("/home");
     } catch (error) {
       console.error("Login failed:", error);
     } finally {
