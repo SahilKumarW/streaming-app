@@ -1,5 +1,6 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import axios from "axios"; // Import axios for API call
 import Container from "../assets/Container.png";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
@@ -7,9 +8,30 @@ import { useNavigate } from "react-router-dom";
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
 
+  const handleLogin = async (values, setSubmitting) => {
+    try {
+      // Simulate a delay and successful response
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Simulated successful login response
+      const data = { token: "fake-jwt-token", user: { email: values.email } };
+      console.log("Login successful:", data);
+
+      // Simulate the onLogin function call (e.g., store user data/token)
+      onLogin(data);
+
+      // Navigate to the dashboard after successful login
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div
-      className="flex justify-center items-center pt-10  h-screen bg-cover bg-center"
+      className="flex justify-center items-center pt-10 h-screen bg-cover bg-center"
       style={{ backgroundImage: `url(${Container})` }}
     >
       <div className="w-[404px] h-[508px] bg-[#09090F] rounded-[20px] flex flex-col items-center">
@@ -21,7 +43,7 @@ const Login = ({ onLogin }) => {
         </p>
         <div className="mt-[30px]">
           <Formik
-            initialValues={{ email: "", password: "" }}
+            initialValues={{ email: "testuser@example.com", password: "Test@1234" }} // Sample login credentials
             validate={(values) => {
               const errors = {};
               if (!values.email) {
@@ -37,12 +59,10 @@ const Login = ({ onLogin }) => {
               return errors;
             }}
             onSubmit={(values, { setSubmitting }) => {
-              console.log(values, "values");
-              onLogin(values); // Call the onLogin prop with form values
-              setSubmitting(false); // Finish submitting
+              handleLogin(values, setSubmitting); // Call the login function
             }}
           >
-            {({ isSubmitting, handleSubmit }) => (
+            {({ isSubmitting }) => (
               <Form className="flex flex-col items-center w-full">
                 <Field
                   type="email"
@@ -74,12 +94,11 @@ const Login = ({ onLogin }) => {
                 >
                   Forgot Password?
                 </p>
-                {/* </Link> */}
                 <Button
                   name="Login"
-                  type="submit" // Ensure button triggers the form submission
+                  type="submit"
                   className="mt-14"
-                  disabled={isSubmitting} // Disable button while submitting
+                  disabled={isSubmitting}
                 />
               </Form>
             )}
@@ -87,7 +106,7 @@ const Login = ({ onLogin }) => {
         </div>
         <div className="mt-[10px]">
           <p className="text-[12px] font-normal leading-[18px] text-[#C4C4C4] opacity-60">
-            Don’t have an account?
+            Don't have an account?
             <span
               onClick={() => navigate("/signup")}
               className="text-[12px] font-normal leading-[18px] text-[#C4C4C4] pl-1 opacity-100 cursor-pointer"
