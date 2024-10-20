@@ -53,6 +53,10 @@
 //       setLoading((prev) => ({ ...prev, watchHistory: false }));
 //     }
 //   };
+
+
+
+  
 //   //searching
 //   const filteredWatchHistoryMovies = watchHistoryMoviesList.filter((movie) =>
 //     movie.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -249,6 +253,8 @@
 
 
 
+
+
 import React, { useState, useEffect } from "react";
 import HeroSection from "../components/HeroSection";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -405,3 +411,6 @@ const ScrollableRow = ({ title, movies, loading }) => {
 
   );
 };
+
+
+
