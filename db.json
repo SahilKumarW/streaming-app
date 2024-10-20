@@ -1,7 +1,7 @@
 {
   "videos": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Inception",
       "description": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
       "category": "Movie",
@@ -11,7 +11,7 @@
       "rating": 4.8
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "Breaking Bad",
       "description": "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.",
       "category": "TV Show",
@@ -21,7 +21,7 @@
       "rating": 4.9
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "The Shawshank Redemption",
       "description": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
       "category": "Movie",
@@ -31,7 +31,7 @@
       "rating": 4.9
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "Friends",
       "description": "Follows the personal and professional lives of six twenty to thirty-something-year-old friends living in Manhattan.",
       "category": "TV Show",
@@ -43,31 +43,29 @@
   ],
   "users": [
     {
-      "id": 1,
-      "name": "John Doe",
-      "email": "john@example.com"
-    },
-    {
-      "id": 2,
-      "name": "Jane Smith",
-      "email": "jane@example.com"
+      "id": "13b0",
+      "fullName": "hiba ",
+      "email": "hibafareed@example.com",
+      "dob": "8-5-2005",
+      "role": "senior developer",
+      "password": "123"
     }
   ],
   "watchHistory": [
     {
-      "id": 1,
+      "id": "1",
       "userId": 1,
       "videoId": 1,
       "watchedAt": "2023-05-01T10:30:00Z"
     },
     {
-      "id": 2,
+      "id": "2",
       "userId": 1,
       "videoId": 2,
       "watchedAt": "2023-05-02T14:45:00Z"
     },
     {
-      "id": 3,
+      "id": "3",
       "userId": 2,
       "videoId": 3,
       "watchedAt": "2023-05-03T20:15:00Z"
@@ -75,19 +73,19 @@
   ],
   "ratings": [
     {
-      "id": 1,
+      "id": "1",
       "userId": 1,
       "videoId": 1,
       "rating": 5
     },
     {
-      "id": 2,
+      "id": "2",
       "userId": 2,
       "videoId": 1,
       "rating": 4
     },
     {
-      "id": 3,
+      "id": "3",
       "userId": 1,
       "videoId": 2,
       "rating": 5
@@ -95,17 +93,17 @@
   ],
   "favorites": [
     {
-      "id": 1,
+      "id": "1",
       "userId": 1,
       "videoId": 1
     },
     {
-      "id": 2,
+      "id": "2",
       "userId": 1,
       "videoId": 3
     },
     {
-      "id": 3,
+      "id": "3",
       "userId": 2,
       "videoId": 2
     }

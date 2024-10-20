@@ -19,55 +19,60 @@ const UserManagement = () => {
 
     // Fetch all users from the API
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const userList = await getAllUsers(); // Use the user service function
-                setUsers(userList); // Assuming 'data' is the array of users
-                setLoading(false);
-            } catch (err) {
-                console.error("Error fetching users:", err);
-                setError("Failed to load users.");
-                setLoading(false);
-            }
-        };
         fetchUsers();
     }, []);
 
-    const fetchUserById = async (userId) => {
+    const fetchUsers = async () => {
         try {
-            const user = await getUserById(userId); // Use the user service function
-            setCurrentUser(user); // Assuming 'data' is the user object
-            setIsEditing(true);
+            const userList = await UserService.getAllUsers();
+            setUsers(userList);
+            setLoading(false);
         } catch (err) {
-            console.error("Error fetching user by ID:", err);
-            setError("Failed to load user details.");
+            console.error("Error fetching users:", err);
+            setError("Failed to load users.");
+            setLoading(false);
         }
     };
 
-    const handleEdit = (userId) => {
-        fetchUserById(userId);
+    const handleEdit = (user) => {
+        setCurrentUser(user);
+        setIsEditing(true);
     };
 
     const handleSaveEdit = async (updatedUser) => {
         try {
-            await updateUser(updatedUser); // Use the user service function
-            setUsers(users.map((user) => (user.id === updatedUser.id ? updatedUser : user)));
+            console.log('Saving edited user:', updatedUser);
+            const response = await UserService.updateUser(updatedUser);
+            console.log("Update response:", response);
+            setUsers(users.map((user) => (user.id === updatedUser.id ? response : user)));
             setIsEditing(false);
-            console.log("User has been updated:", updatedUser);
+            setCurrentUser(null);
+            console.log("User has been updated:", response);
         } catch (err) {
             console.error("Error updating user:", err);
-            setError("Failed to update user.");
+            setError("Failed to update user. Please try again.");
         }
     };
 
     const handleDelete = async (userId) => {
         try {
-            await deleteUser(userId); // Use the user service function
+            console.log(`Attempting to delete user with ID: ${userId}`);
+            await UserService.deleteUser(userId);
             setUsers(users.filter((user) => user.id !== userId));
             console.log(`User with ID ${userId} has been deleted!`);
         } catch (err) {
             console.error("Error deleting user:", err);
-            setError("Failed to delete user.");
+            if (err.response) {
+                console.error("Error response:", err.response);
+                console.error("Error data:", err.response.data);
+                console.error("Error status:", err.response.status);
+                console.error("Error headers:", err.response.headers);
+            } else if (err.request) {
+                console.error("Error request:", err.request);
+            } else {
+                console.error("Error message:", err.message);
+            }
+            setError("Failed to delete user. Please try again.");
         }
     };
 
@@ -148,11 +153,14 @@ const UserManagement = () => {
                 )}
             </div>
 
-            {isEditing && (
+            {isEditing && currentUser && (
                 <EditUserModal
                     user={currentUser}
                     onSave={handleSaveEdit}
-                    onClose={() => setIsEditing(false)}
+                    onClose={() => {
+                        setIsEditing(false);
+                        setCurrentUser(null);
+                    }}
                 />
             )}
         </div>

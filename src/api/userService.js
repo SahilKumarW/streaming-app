@@ -1,23 +1,35 @@
 // userService.js
 
-import { get, post, put, deleteRequest } from './axios'; // Adjust the import based on your axios configuration
+import { get, post, patch, deleteRequest } from './axios'; // Change 'put' to 'patch'
+
+const BASE_URL = 'http://localhost:3001/users';
 
 const UserService = {
-    addUser: async (user, authToken) => {
-        return await post('/api/Users/add-user', user, authToken); // POST new user
+    addUser: async (user) => {
+        return await post(BASE_URL, user);
     },
     // Add other functions like getAllUsers, getUserById, updateUser, deleteUser
-    getAllUsers: async (authToken) => {
-        return await get('/api/Users/get-all-users', authToken);
+    getAllUsers: async () => {
+        return await get(BASE_URL);
     },
-    getUserById: async (userId, authToken) => {
-        return await get(`/api/Users/${userId}`, authToken);
+    getUserById: async (userId) => {
+        return await get(`${BASE_URL}/${userId}`);
     },
-    updateUser: async (user, authToken) => {
-        return await put(`/api/Users/update-user/${user.id}`, user, authToken);
+    updateUser: async (user) => {
+        console.log('Updating user:', user);
+        console.log('Request URL:', `${BASE_URL}/${user.id}`);
+        return await patch(`${BASE_URL}/${user.id}`, user);
     },
-    deleteUser: async (userId, authToken) => {
-        return await deleteRequest(`/api/Users/delete-user/${userId}`, authToken);
+    deleteUser: async (userId) => {
+        console.log(`Attempting to delete user with ID: ${userId}`);
+        try {
+            const response = await deleteRequest(`${BASE_URL}/${userId}`);
+            console.log(`Delete response for user ${userId}:`, response);
+            return response;
+        } catch (error) {
+            console.error(`Error deleting user with ID ${userId}:`, error);
+            throw error;
+        }
     },
 };
 

@@ -7,6 +7,12 @@ const UserTable = ({ users, onEdit, onDelete }) => {
         setSearchTerm(event.target.value);
     };
 
+    const filteredUsers = users.filter(user => 
+        user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.role?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="overflow-x-auto">
             <div className="border-t border-l border-r border-white border-opacity-20 rounded-t-lg bg-stone-900">
@@ -37,46 +43,39 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.isArray(users) && users.length === 0 ? (
+                        {filteredUsers.length === 0 ? (
                             <tr>
                                 <td colSpan="4" className="p-4 text-center">
                                     No users found. <button className="text-teal-500" onClick={() => window.location.href = "/addUser"}>Add User</button>
                                 </td>
                             </tr>
-                        ) : Array.isArray(users) ? (
-                            users
-                                .filter(user =>
-                                    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    user.role.toLowerCase().includes(searchTerm.toLowerCase())
-                                )
-                                .map((user) => (
-                                    <tr key={user.id}>
-                                        <td className="p-4">{user.name}</td>
-                                        <td className="p-4">{user.email}</td>
-                                        <td className="p-4">{user.role}</td>
-                                        <td className="p-4">
-                                            <button
-                                                className="text-blue-500 mr-2"
-                                                onClick={() => onEdit(user)}
-                                                aria-label={`Edit ${user.name}`}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                className="text-red-500"
-                                                onClick={() => onDelete(user.id)}
-                                                aria-label={`Delete ${user.name}`}
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
                         ) : (
-                            <tr>
-                                <td colSpan="4" className="p-4 text-center">Invalid user data.</td>
-                            </tr>
+                            filteredUsers.map((user) => (
+                                <tr key={user.id}>
+                                    <td className="p-4">{user.fullName}</td>
+                                    <td className="p-4">{user.email}</td>
+                                    <td className="p-4">{user.role}</td>
+                                    <td className="p-4">
+                                        <button
+                                            className="text-blue-500 mr-2"
+                                            onClick={() => {
+                                                console.log("Editing user:", user);
+                                                onEdit(user);
+                                            }}
+                                            aria-label={`Edit ${user.fullName}`}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="text-red-500"
+                                            onClick={() => onDelete(user.id)}
+                                            aria-label={`Delete ${user.fullName}`}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
                         )}
                     </tbody>
                 </table>

@@ -6,8 +6,8 @@ import arrow from '../assets/arrow.svg';
 import Modal from '../Modals/Modal';
 import { FaCamera } from 'react-icons/fa';
 import profile from "/Assets/profile.png";
-import axios from 'axios';
 import CustomInput from '../components/CustomeInput';
+import UserService from '../api/userService';
 
 const AddUser = () => {
     // State for managing modal
@@ -28,22 +28,20 @@ const AddUser = () => {
     // Handle the form submission
     const handleAddUser = async () => {
         try {
-            const response = await axios.get('/api/Users/add-user', {
-                params: {
-                    fullName,
-                    email,
-                    dob,
-                    role,
-                    password,
-                    confirmPassword
-                }
-            });
+            const newUser = {
+                fullName,
+                email,
+                dob,
+                role,
+                password
+            };
 
-            // Assuming response.data contains a success message or user data
+            const response = await UserService.addUser(newUser);
+
             setMessage('User added successfully!');
             setMessageType('success');
 
-            // Optionally, clear the form fields after successful submission
+            // Clear form fields
             setFullName('');
             setEmail('');
             setDob('');
@@ -51,7 +49,6 @@ const AddUser = () => {
             setPassword('');
             setConfirmPassword('');
 
-            // Hide the message after 3 seconds
             setTimeout(() => setMessage(''), 3000);
 
         } catch (error) {
@@ -59,7 +56,6 @@ const AddUser = () => {
             setMessage('Failed to add user.');
             setMessageType('error');
 
-            // Hide the message after 3 seconds
             setTimeout(() => setMessage(''), 3000);
         }
     };
@@ -121,6 +117,3 @@ const AddUser = () => {
 };
 
 export default AddUser;
-
-
-
