@@ -24,7 +24,8 @@
     "react-spinners": "^0.14.1",
     "react-toastify": "^10.0.5",
     "video.js": "^8.17.3",
-    "videojs-http-source-selector": "^1.1.6"
+    "videojs-http-source-selector": "^1.1.6",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",

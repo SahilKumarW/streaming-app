@@ -3,47 +3,28 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import Container from "../assets/Container.png";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
 
-  const initialValues = {
-    email: "testuser@example.com", // Example initial email
-    password: "Test@1234", // Example initial password
+  const login = (values) => {
+    axios
+      .post("http://streamapp2-env.eba-jqkp2xdu.us-east-2.elasticbeanstalk.com/api/auth", { username: values.email, password: values.password }) 
+      .then((response) => {
+        toast.success("User Sucessfully Logged In")
+        navigate("/home");
+      })
+      .catch((error) => {
+        toast.error("email or password is incorrect!")
+        console.log("Login failed:", error);
+      });
   };
 
-  const handleLogin = async (values, setSubmitting) => {
-    try {
-      // Simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Check if input matches initial values
-      if (
-        values.email === initialValues.email &&
-        values.password === initialValues.password
-      ) {
-        // Simulated successful login response
-        const data = {
-          token: "fake-jwt-token",
-          user: { email: values.email },
-        };
-        console.log("Login successful:", data);
-
-        // Call onLogin to store user data/token
-        onLogin(data);
-
-        // Navigate to the dashboard after successful login
-        navigate("/home");
-      } else {
-        // Handle incorrect credentials
-        throw new Error("Invalid credentials");
-      }
-    } catch (error) {
-      console.error("Login failed:", error);
-      // You can set an error state here to display a message to the user
-    } finally {
-      setSubmitting(false);
-    }
+  const initialValues = {
+    email: "",
+    password: ""
   };
 
   return (
@@ -51,7 +32,7 @@ const Login = ({ onLogin }) => {
       className="flex justify-center items-center pt-10 h-screen bg-cover bg-center"
       style={{ backgroundImage: `url(${Container})` }}
     >
-      <div className="w-[404px] h-[508px] bg-[#09090F] rounded-[20px] flex flex-col items-center">
+      <div className="w-[404px] h-[438px] bg-[#09090F] rounded-[20px] flex flex-col items-center">
         <div className="w-[194px] h-[76px] text-center flex justify-center items-center text-white text-[28px] leading-[38px] font-semibold mt-[46px]">
           Welcome to App Name
         </div>
@@ -60,7 +41,7 @@ const Login = ({ onLogin }) => {
         </p>
         <div className="mt-[30px]">
           <Formik
-            initialValues={initialValues} // Use initial values from here
+            initialValues={initialValues}
             validate={(values) => {
               const errors = {};
               if (!values.email) {
@@ -76,7 +57,8 @@ const Login = ({ onLogin }) => {
               return errors;
             }}
             onSubmit={(values, { setSubmitting }) => {
-              handleLogin(values, setSubmitting); // Call the login function
+              login(values);
+              setSubmitting(false);
             }}
           >
             {({ isSubmitting }) => (
@@ -104,17 +86,10 @@ const Login = ({ onLogin }) => {
                   component="div"
                   className="text-red-500 text-sm"
                 />
-
-                <p
-                  onClick={() => navigate("/forgot-password")}
-                  className="w-[109px] h-[22px] text-white font-medium text-[12px] leading-[22px] ml-auto opacity-60 cursor-pointer"
-                >
-                  Forgot Password?
-                </p>
                 <Button
                   name="Login"
                   type="submit"
-                  className="mt-14"
+                  className="mt-2"
                   disabled={isSubmitting}
                 />
               </Form>

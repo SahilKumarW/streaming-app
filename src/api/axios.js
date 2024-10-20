@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "http://localhost:3000", // Set base URL to json-server
+  baseURL: "http://streamapp2-env.eba-jqkp2xdu.us-east-2.elasticbeanstalk.com", // Set base URL to json-server
   headers: {
     "Content-Type": "application/json",
   },

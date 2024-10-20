@@ -4,22 +4,45 @@ import Container from "../assets/Container.png";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import AuthService from "../api/authService"; // Import AuthService for API call
+import { toast } from "react-toastify";
+import * as Yup from "yup"; // Import Yup for validation schema
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState(""); // State for error messages
-  const [loading, setLoading] = useState(false); // State for loading indicator
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const SignupSchema = Yup.object().shape({
+    name: Yup.string().required("Full name is required"),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    phoneNumber: Yup.string().required("Phone number is required"),
+    gender: Yup.number()
+      .oneOf([0, 1], "Please select a valid gender")
+      .required("Gender is required"),
+    dateOfBirth: Yup.date().required("Date of birth is required"),
+    password: Yup.string()
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required"),
+  });
 
   const handleSignup = async (values, setSubmitting) => {
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
-      const response = await AuthService.register(values); // Use AuthService to register
+      const response = await AuthService.register({
+        ...values,
+        gender: Number(values.gender),
+        dateOfBirth: new Date(values.dateOfBirth).toISOString(), // Ensure date format is correct
+      });
 
+      console.log(response,'responseresponse')
       // Check if the response indicates success
-      if (response.status === 200) {
-        console.log("Registration successful:", response.data);
+      if (response.displayMessage === 'User added successfully.') {
+        toast.success(response.displayMessage);
         navigate("/login"); // Redirect to login after successful registration
       } else {
+        toast.error(response.displayMessage);
         throw new Error("Registration failed"); // Handle other statuses
       }
     } catch (error) {
@@ -36,7 +59,7 @@ const Signup = () => {
       className="flex justify-center items-center pt-10 h-screen bg-cover bg-center"
       style={{ backgroundImage: `url(${Container})` }}
     >
-      <div className="w-[404px] h-[508px] bg-[#09090F] rounded-[20px] flex flex-col items-center">
+      <div className="w-[404px] pb-5 bg-[#09090F] rounded-[20px] flex flex-col items-center">
         <div className="w-[194px] h-[76px] text-center flex justify-center items-center text-white text-[28px] leading-[38px] font-semibold mt-[46px]">
           Create A New Account
         </div>
@@ -44,45 +67,37 @@ const Signup = () => {
           Lorem ipsum dolor sit amet consectetur adipisicing
         </p>
         {errorMessage && (
-          <div className="text-red-500 mb-2">{errorMessage}</div> // Display error message
+          <div className="text-red-500 mb-2">{errorMessage}</div>
         )}
-        <div className="mt-[30px]">
+        <div className="mt-[20px]">
           <Formik
-            initialValues={{ fullName: "", email: "", password: "" }}
-            validate={(values) => {
-              const errors = {};
-              if (!values.fullName) {
-                errors.fullName = "Required";
-              }
-              if (!values.email) {
-                errors.email = "Required";
-              } else if (
-                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-              ) {
-                errors.email = "Invalid email address";
-              }
-              if (!values.password) {
-                errors.password = "Required";
-              }
-              return errors;
+            initialValues={{
+              name: "", // Changed from fullName to name
+              email: "",
+              phoneNumber: "",
+              gender: -1, // Ensure default invalid gender selection
+              dateOfBirth: "",
+              password: "",
             }}
+            validationSchema={SignupSchema} // Apply Yup validation schema
             onSubmit={(values, { setSubmitting }) => {
-              handleSignup(values, setSubmitting); // Pass setSubmitting to handleSignup
+              handleSignup(values, setSubmitting);
             }}
           >
             {({ isSubmitting }) => (
               <Form className="flex flex-col items-center w-full">
                 <Field
                   type="text"
-                  name="fullName"
+                  name="name"
                   placeholder="Full name"
                   className="w-[311px] h-[56px] rounded-[14px] border border-white bg-black text-white text-[12px] font-medium leading-[18px] px-4 mb-4 placeholder-gray-500"
                 />
                 <ErrorMessage
-                  name="fullName"
+                  name="name"
                   component="div"
                   className="text-red-500 text-sm"
                 />
+
                 <Field
                   type="email"
                   name="email"
@@ -94,6 +109,46 @@ const Signup = () => {
                   component="div"
                   className="text-red-500 text-sm"
                 />
+
+                <Field
+                  type="text"
+                  name="phoneNumber"
+                  placeholder="Phone number"
+                  className="w-[311px] h-[56px] rounded-[14px] border border-white bg-black text-white text-[12px] font-medium leading-[18px] px-4 mb-4 placeholder-gray-500"
+                />
+                <ErrorMessage
+                  name="phoneNumber"
+                  component="div"
+                  className="text-red-500 text-sm"
+                />
+
+                <Field
+                  as="select"
+                  name="gender"
+                  className="w-[311px] h-[56px] rounded-[14px] border border-white bg-black text-white text-[12px] font-medium leading-[18px] px-4 mb-4 placeholder-gray-500"
+                >
+                  <option value={-1} label="Select gender" />
+                  <option value={0} label="Male" />
+                  <option value={1} label="Female" />
+                </Field>
+                <ErrorMessage
+                  name="gender"
+                  component="div"
+                  className="text-red-500 text-sm"
+                />
+
+                <Field
+                  type="date"
+                  name="dateOfBirth"
+                  placeholder="Date of Birth"
+                  className="w-[311px] h-[56px] rounded-[14px] border border-white bg-black text-white text-[12px] font-medium leading-[18px] px-4 mb-4 placeholder-gray-500"
+                />
+                <ErrorMessage
+                  name="dateOfBirth"
+                  component="div"
+                  className="text-red-500 text-sm"
+                />
+
                 <Field
                   type="password"
                   name="password"
@@ -105,10 +160,11 @@ const Signup = () => {
                   component="div"
                   className="text-red-500 text-sm"
                 />
+
                 <Button
-                  name={loading ? "Registering..." : "Register"} // Change button text based on loading state
+                  name={loading ? "Registering..." : "Register"}
                   className="mt-7"
-                  disabled={isSubmitting || loading} // Disable button when submitting or loading
+                  disabled={isSubmitting || loading}
                   type="submit"
                 />
               </Form>
