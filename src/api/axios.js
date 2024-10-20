@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "http://localhost:5000", 
+  baseURL: "http://localhost:3000", // Set base URL to json-server
   headers: {
     "Content-Type": "application/json",
   },
@@ -110,11 +110,10 @@ export { instance, get, post, deleteRequest, put };
 
 
 axios.interceptors.request.use((request) => {
-  console.log("Request URL:", request.url);  // Log the URL
-  const fullUrl = `${baseURL}${request.url}`;
+  if (request.url === '/api/UploadVedios/StoreVideo') {
+    console.log("Mocking POST request to:", request.url);
 
-  if (fullUrl === 'http://localhost:5174/api/UploadVedios/StoreVideo') {
-    console.log("Mocking POST request to:", fullUrl);
+    // Simulate a delay for the mock response
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({

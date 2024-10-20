@@ -3,37 +3,31 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import Container from "../assets/Container.png";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
+import AuthService from "../api/authService"; // Import AuthService for API call
 
 const Signup = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState(""); // State for error messages
+  const [loading, setLoading] = useState(false); // State for loading indicator
 
   const handleSignup = async (values, setSubmitting) => {
+    setLoading(true); // Start loading
     try {
-      const response = await fetch("/api/Auth/register", { // Updated endpoint
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+      const response = await AuthService.register(values); // Use AuthService to register
 
-      if (!response.ok) {
-        const errorData = await response.json(); // Get the error response
-        throw new Error(errorData.message || "Registration failed"); // Use the error message from the server
+      // Check if the response indicates success
+      if (response.status === 200) {
+        console.log("Registration successful:", response.data);
+        navigate("/login"); // Redirect to login after successful registration
+      } else {
+        throw new Error("Registration failed"); // Handle other statuses
       }
-
-      const data = await response.json(); // Assume the server returns user data
-      console.log("Registration successful:", data);
-      // Optional: Store token or user data if your backend returns it
-      // localStorage.setItem('token', data.token); // Example for token storage
-
-      navigate("/login"); // Redirect to login after successful registration
     } catch (error) {
       console.error("Error:", error);
       setErrorMessage(error.message); // Set error message for user feedback
     } finally {
       setSubmitting(false); // Allow form submission again
+      setLoading(false); // Stop loading
     }
   };
 
@@ -112,9 +106,9 @@ const Signup = () => {
                   className="text-red-500 text-sm"
                 />
                 <Button
-                  name="Register"
+                  name={loading ? "Registering..." : "Register"} // Change button text based on loading state
                   className="mt-7"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || loading} // Disable button when submitting or loading
                   type="submit"
                 />
               </Form>

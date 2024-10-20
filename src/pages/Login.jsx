@@ -1,6 +1,5 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import axios from "axios"; // Import axios for API call
 import Container from "../assets/Container.png";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
@@ -8,22 +7,40 @@ import { useNavigate } from "react-router-dom";
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
 
+  const initialValues = {
+    email: "testuser@example.com", // Example initial email
+    password: "Test@1234", // Example initial password
+  };
+
   const handleLogin = async (values, setSubmitting) => {
     try {
-      // Simulate a delay and successful response
+      // Simulate a delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Simulated successful login response
-      const data = { token: "fake-jwt-token", user: { email: values.email } };
-      console.log("Login successful:", data);
+      // Check if input matches initial values
+      if (
+        values.email === initialValues.email &&
+        values.password === initialValues.password
+      ) {
+        // Simulated successful login response
+        const data = {
+          token: "fake-jwt-token",
+          user: { email: values.email },
+        };
+        console.log("Login successful:", data);
 
-      // Simulate the onLogin function call (e.g., store user data/token)
-      onLogin(data);
+        // Call onLogin to store user data/token
+        onLogin(data);
 
-      // Navigate to the dashboard after successful login
-      navigate("/home");
+        // Navigate to the dashboard after successful login
+        navigate("/home");
+      } else {
+        // Handle incorrect credentials
+        throw new Error("Invalid credentials");
+      }
     } catch (error) {
       console.error("Login failed:", error);
+      // You can set an error state here to display a message to the user
     } finally {
       setSubmitting(false);
     }
@@ -43,7 +60,7 @@ const Login = ({ onLogin }) => {
         </p>
         <div className="mt-[30px]">
           <Formik
-            initialValues={{ email: "testuser@example.com", password: "Test@1234" }} // Sample login credentials
+            initialValues={initialValues} // Use initial values from here
             validate={(values) => {
               const errors = {};
               if (!values.email) {
