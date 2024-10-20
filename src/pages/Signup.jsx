@@ -79,7 +79,7 @@ const Signup = () => {
               dateOfBirth: "",
               password: "",
             }}
-            validationSchema={SignupSchema} // Apply Yup validation schema
+            validationSchema={SignupSchema} // ply Yup validation schema
             onSubmit={(values, { setSubmitting }) => {
               handleSignup(values, setSubmitting);
             }}
