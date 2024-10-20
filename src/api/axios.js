@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "",
+  baseURL: "http://localhost:5000", 
   headers: {
     "Content-Type": "application/json",
   },
@@ -36,6 +36,9 @@ const get = async (endpoint, authToken) => {
     handleErrors(error, endpoint);
   }
 };
+
+
+
 
 const post = async (endpoint, data, authToken) => {
   try {
@@ -84,19 +87,39 @@ export { instance, get, post, deleteRequest, put };
 
 
 
-// Mocking axios POST request for video upload
+
+
+// axios.interceptors.request.use((request) => {
+//   console.log("Request URL:", request.url);  // Debugging the URL
+//   if (request.url === '/api/UploadVedios/StoreVideo') {
+//     console.log("Mocking POST request to:", request.url);
+//     return new Promise((resolve) => {
+//       setTimeout(() => {
+//         resolve({
+//           status: 200,
+//           data: { message: "Video uploaded successfully (Mock Response)" },
+//         });
+//       }, 1000);
+//     });
+//   }
+//   return request;
+// });
+
+
+
+
+
 axios.interceptors.request.use((request) => {
-  if (request.url === '/api/UploadVedios/StoreVideo') {
-    console.log("Mocking POST request to:", request.url);
-    
-    // Simulate a delay for the mock response
+  console.log("Request URL:", request.url);  // Log the URL
+  const fullUrl = `${baseURL}${request.url}`;
+
+  if (fullUrl === 'http://localhost:5174/api/UploadVedios/StoreVideo') {
+    console.log("Mocking POST request to:", fullUrl);
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
           status: 200,
-          data: {
-            message: "Video uploaded successfully (Mock Response)",
-          },
+          data: { message: "Video uploaded successfully (Mock Response)" },
         });
       }, 1000);
     });
@@ -104,3 +127,4 @@ axios.interceptors.request.use((request) => {
   return request;
 });
 
+ 

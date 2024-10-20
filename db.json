@@ -1,0 +1,91 @@
+
+
+
+  {
+    "UploadVedios": {
+      "get-user-watch-history": [
+        {
+          "id": 1,
+          "name": "Inception",
+          "description": "Watch History Movie",
+          "thumbnail": "https://via.placeholder.com/300x150.png?text=Inception"
+        },
+        {
+          "id": 2,
+          "name": "Interstellar",
+          "description": "Watch History Movie",
+          "thumbnail": "https://via.placeholder.com/300x150.png?text=Interstellar"
+        }
+      ],
+      "show-vedio-list": [
+        {
+          "id": 1,
+          "name": "The Matrix",
+          "description": "Recommended Movie",
+          "thumbnail": "https://via.placeholder.com/300x150.png?text=The+Matrix"
+        },
+        {
+          "id": 2,
+          "name": "John Wick",
+          "description": "Recommended Movie",
+          "thumbnail": "https://via.placeholder.com/300x150.png?text=John+Wick"
+        }
+      ],
+      "get-top-rated-movies": [
+        {
+          "id": 1,
+          "name": "The Dark Knight",
+          "description": "Top Rated Movie",
+          "thumbnail": "https://via.placeholder.com/300x150.png?text=The+Dark+Knight"
+        },
+        {
+          "id": 2,
+          "name": "Avengers: Endgame",
+          "description": "Top Rated Movie",
+          "thumbnail": "https://via.placeholder.com/300x150.png?text=Avengers+Endgame"
+        }
+      ],
+      "get-top-rated-tvshows": [
+        {
+          "id": 1,
+          "name": "Breaking Bad",
+          "description": "Top Rated TV Show",
+          "thumbnail": "https://via.placeholder.com/300x150.png?text=Breaking+Bad"
+        },
+        {
+          "id": 2,
+          "name": "Stranger Things",
+          "description": "Top Rated TV Show",
+          "thumbnail": "https://via.placeholder.com/300x150.png?text=Stranger+Things"
+        }
+      ]
+    },
+    "users": [
+      {
+        "id": 1,
+        "name": "John Doe",
+        "level": "Admin",
+        "accountCreated": "2024-01-10",
+        "subscription": "Premium",
+        "avatar": "/Assets/john.jpg"
+      },
+      {
+        "id": 2,
+        "name": "Jane Smith",
+        "level": "User",
+        "accountCreated": "2024-02-15",
+        "subscription": "Basic",
+        "avatar": "/Assets/jane.jpg"
+      },
+      {
+        "id": 3,
+        "name": "Tom Cruise",
+        "level": "Moderator",
+        "accountCreated": "2024-03-20",
+        "subscription": "Premium",
+        "avatar": "/Assets/tom.jpg"
+      }
+    ]
+  }
+  
+  
