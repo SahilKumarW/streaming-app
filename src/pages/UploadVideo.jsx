@@ -10,7 +10,9 @@ const UploadVideo = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [videoURL, setVideoURL] = useState("");
+  const [filename, setFilename] = useState("");
   const [movieName, setMovieName] = useState("");
   const [category, setCategory] = useState("");
   const [genre, setGenre] = useState("");
@@ -32,6 +34,9 @@ const UploadVideo = () => {
     }
 
     setLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
     const formData = new FormData();
     formData.append('video', selectedVideo);
     formData.append('movieName', movieName);
@@ -42,42 +47,85 @@ const UploadVideo = () => {
 
     try {
       const response = await VideoService.storeVideo(formData);
-      if (response) {
-        console.log("Video upload successful:", response.data);
-        // Optionally, you can call addWatchHistory here if needed
-      }
+      console.log("Video upload successful:", response);
+      setSuccessMessage("Video uploaded successfully!");
+      // Clear form
+      setSelectedVideo(null);
+      setMovieName("");
+      setCategory("");
+      setGenre("");
+      setStoryLine("");
+      setCast("");
     } catch (error) {
       console.error("Error uploading video:", error);
-      setErrorMessage("Video upload failed. Please try again.");
+      if (error.message.includes('File size exceeds server limit')) {
+        setErrorMessage(error.message + " Please try a smaller file or contact support.");
+      } else if (error.response) {
+        setErrorMessage(`Upload failed: ${error.response.status} ${error.response.statusText}. ${error.message}`);
+      } else if (error.request) {
+        setErrorMessage("Upload failed: No response received from the server. Please try again.");
+      } else {
+        setErrorMessage(`Upload failed: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleSubmitToSecondAPI = async () => {
-    if (!videoURL) {
-      setErrorMessage("Please provide a video URL.");
+    if (!videoURL.trim() || !filename.trim() || !movieName.trim() || !category.trim() || !genre.trim()) {
+      setErrorMessage("Please fill in all required fields (Video URL, Filename, Movie Name, Category, and Genre).");
+      return;
+    }
+
+    // Basic URL validation
+    if (!videoURL.startsWith('http://') && !videoURL.startsWith('https://')) {
+      setErrorMessage("Please enter a valid URL starting with http:// or https://");
       return;
     }
 
     setLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
     try {
-      // Create the data object for the video upload
       const urlData = {
-        title: "Video from URL",  // You can customize the title
-        description: "Video uploaded by URL.",  // Customize as needed
-        videoUrl: videoURL,  // The video URL to upload
+        url: videoURL,
+        filename: filename,
+        title: movieName,
+        description: storyLine,
+        category: category,
+        genre: genre,
+        cast: cast,
       };
 
-      // Call the VideoService to upload the video
+      console.log('Sending data to server:', urlData);
+
       const response = await VideoService.storeVideoByUrl(urlData);
-      if (response) {
-        console.log("Video URL upload successful:", response);
-        // Handle success, e.g., show a success message or redirect
-      }
+      console.log("Video URL upload successful:", response);
+      setSuccessMessage("Video URL uploaded successfully!");
+      // Clear form
+      setVideoURL("");
+      setFilename("");
+      setMovieName("");
+      setCategory("");
+      setGenre("");
+      setStoryLine("");
+      setCast("");
     } catch (error) {
       console.error("Error uploading video URL:", error);
-      setErrorMessage("Video URL upload failed. Please try again.");
+      if (error.response && error.response.data && error.response.data.errors) {
+        const errorMessages = Object.entries(error.response.data.errors)
+          .map(([key, value]) => `${key}: ${value.join(', ')}`)
+          .join('; ');
+        setErrorMessage(`Validation errors: ${errorMessages}`);
+      } else if (error.response) {
+        setErrorMessage(`Upload failed: ${error.response.status} ${error.response.statusText}`);
+      } else if (error.request) {
+        setErrorMessage("Upload failed: No response received from the server. Please try again.");
+      } else {
+        setErrorMessage(`Upload failed: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -119,18 +167,34 @@ const UploadVideo = () => {
       </div>
 
       <div className="mt-3">
-        <CustomInput placeholder="Video URL" value={videoURL} onChange={(e) => setVideoURL(e.target.value)} />
+        <CustomInput 
+          placeholder="Video URL" 
+          value={videoURL} 
+          onChange={(e) => setVideoURL(e.target.value)}
+          required 
+        />
+      </div>
+
+      <div className="mt-3">
+        <CustomInput 
+          placeholder="Filename" 
+          value={filename} 
+          onChange={(e) => setFilename(e.target.value)}
+          required 
+        />
       </div>
 
       <div className="mt-3">
         <Button name={loading ? "Uploading..." : "Upload to Second API (URL)"} onClick={handleSubmitToSecondAPI} disabled={loading} />
       </div>
 
+      {successMessage && <div className="text-green-500 mt-2">{successMessage}</div>}
       {errorMessage && <div className="text-red-500 mt-2">{errorMessage}</div>}
     </div>
   );
 };
 
 export default UploadVideo;
+
 
 

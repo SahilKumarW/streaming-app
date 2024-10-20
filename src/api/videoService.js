@@ -3,10 +3,33 @@ import { post, get, put } from './axios'; // Assuming axios.js is set up correct
 const VideoService = {
     // Video Upload APIs
     storeVideo: async (formData) => {
-        return await post('/videos', formData); // POST to /videos
+        try {
+            const file = formData.get('video');
+            console.log('Uploading file:', file.name, 'Size:', file.size, 'bytes');
+
+            if (file.size > 578) {
+                throw new Error('File size exceeds server limit of 578 bytes. Please contact the server administrator.');
+            }
+
+            return await post('/api/UploadVedios/StoreVideo', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity
+            });
+        } catch (error) {
+            console.error('Upload error:', error);
+            throw error;
+        }
     },
     storeVideoByUrl: async (urlData) => {
-        return await post('/videos', urlData); // POST to /videos for URL-based video upload
+        try {
+            return await post('/api/UploadVedios/Store-url', urlData);
+        } catch (error) {
+            console.error('URL upload error:', error);
+            throw error;
+        }
     },
 
     // Watch History APIs
@@ -26,25 +49,27 @@ const VideoService = {
     },
 
     // Video Retrieval
-    getVideoById: async (videoId) => {
-        return await get(`/videos/${videoId}`); // GET specific video by ID
-    },
     searchVideos: async (query) => {
-        return await get(`/videos?q=${query}`); // GET videos matching the search query
+        const authToken = localStorage.getItem('authToken');
+        return get(`/api/UploadVedios/Search?query=${query}`, authToken);
+    },
+    getVideoById: async (videoId) => {
+        const authToken = localStorage.getItem('authToken');
+        return get(`/api/UploadVedios/get-vedio-by-id?id=${videoId}`, authToken);
     },
     showVideoList: async () => {
-        return await get('/videos'); // GET all videos
+        return get('/videos');
     },
     getTopRatedMovies: async () => {
-        return await get('/videos?category=movies&sort=rating'); // GET top-rated movies
+        return get('/videos?category=Movie&_sort=rating&_order=desc');
     },
     getTopRatedTvShows: async () => {
-        return await get('/videos?category=tvshows&sort=rating'); // GET top-rated TV shows
+        return get('/videos?category=TV Show&_sort=rating&_order=desc');
     },
 
     // User Watch History
     getUserWatchHistory: async (userId) => {
-        return await get(`/watchHistory?userId=${userId}`); // GET watch history for a user
+        return get(`/watchHistory?userId=${userId}&_expand=video`);
     },
 
     // Thumbnail Upload

@@ -1,76 +1,113 @@
 {
-  "users": [
-    {
-      "id": "1",
-      "name": "John Doe",
-      "email": "john.doe@example.com",
-      "role": "Admin",
-      "status": "Active"
-    },
-    {
-      "id": "2",
-      "name": "Jane Smith",
-      "email": "jane.smith@example.com",
-      "role": "User",
-      "status": "Active"
-    },
-    {
-      "id": "3",
-      "name": "Michael Johnson",
-      "email": "michael.johnson@example.com",
-      "role": "User",
-      "status": "Blocked"
-    },
-    {
-      "id": "4",
-      "name": "Emily Davis",
-      "email": "emily.davis@example.com",
-      "role": "Moderator",
-      "status": "Active"
-    },
-    {
-      "id": "5",
-      "name": "William Brown",
-      "email": "william.brown@example.com",
-      "role": "User",
-      "status": "Active"
-    }
-  ],
   "videos": [
     {
-      "id": "1",
-      "movieName": "Inception",
-      "category": "Action",
+      "id": 1,
+      "name": "Inception",
+      "description": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+      "category": "Movie",
       "genre": "Sci-Fi",
-      "storyLine": "A thief who steals corporate secrets...",
-      "cast": "Leonardo DiCaprio"
+      "imageUrl": "/Assets/inception.png",
+      "videoUrl": "https://example.com/inception.mp4",
+      "rating": 4.8
     },
     {
-      "id": "7699",
-      "video": {},
-      "movieName": "YOU ASKED",
-      "category": "YOU ASKED",
-      "genre": "YOU ASKED",
-      "storyLine": "YOU ASKED",
-      "cast": "YOU ASKED"
+      "id": 2,
+      "name": "Breaking Bad",
+      "description": "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.",
+      "category": "TV Show",
+      "genre": "Drama",
+      "imageUrl": "/Assets/dark.png",
+      "videoUrl": "https://example.com/breakingbad.mp4",
+      "rating": 4.9
     },
     {
-      "id": "e1bb",
-      "title": "Video from URL",
-      "description": "Video uploaded by URL.",
-      "videoUrl": "https://youtu.be/uSCHmIQ9mo0?si=fxzkulZcYhVVjYQF"
+      "id": 3,
+      "name": "The Shawshank Redemption",
+      "description": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+      "category": "Movie",
+      "genre": "Drama",
+      "imageUrl": "/Assets/parasite.png",
+      "videoUrl": "https://example.com/shawshank.mp4",
+      "rating": 4.9
     },
     {
-      "id": "8612",
-      "video": {},
-      "movieName": "IMG_0147",
-      "category": "IMG_0147",
-      "genre": "IMG_0147",
-      "storyLine": "IMG_0147",
-      "cast": "IMG_0147"
+      "id": 4,
+      "name": "Friends",
+      "description": "Follows the personal and professional lives of six twenty to thirty-something-year-old friends living in Manhattan.",
+      "category": "TV Show",
+      "genre": "Comedy",
+      "imageUrl": "/Assets/ninetine.jpg",
+      "videoUrl": "https://example.com/friends.mp4",
+      "rating": 4.7
     }
   ],
-  "favorites": [],
-  "watchHistory": [],
-  "ratings": []
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com"
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane@example.com"
+    }
+  ],
+  "watchHistory": [
+    {
+      "id": 1,
+      "userId": 1,
+      "videoId": 1,
+      "watchedAt": "2023-05-01T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "videoId": 2,
+      "watchedAt": "2023-05-02T14:45:00Z"
+    },
+    {
+      "id": 3,
+      "userId": 2,
+      "videoId": 3,
+      "watchedAt": "2023-05-03T20:15:00Z"
+    }
+  ],
+  "ratings": [
+    {
+      "id": 1,
+      "userId": 1,
+      "videoId": 1,
+      "rating": 5
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "videoId": 1,
+      "rating": 4
+    },
+    {
+      "id": 3,
+      "userId": 1,
+      "videoId": 2,
+      "rating": 5
+    }
+  ],
+  "favorites": [
+    {
+      "id": 1,
+      "userId": 1,
+      "videoId": 1
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "videoId": 3
+    },
+    {
+      "id": 3,
+      "userId": 2,
+      "videoId": 2
+    }
+  ]
 }
