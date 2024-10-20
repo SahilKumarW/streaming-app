@@ -7,23 +7,30 @@ import myListImage from "../assets/MyList.png";
 
 const MyList = () => {
   const [myListMovies, setMyListMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [similarMovies, setSimilarMovies] = useState([]);
+  const [loading, setLoading] = useState({
+    myList: true,
+    similar: true,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        setLoading({ myList: true, similar: true });
 
-        // For demonstration, we'll use the showVideoList method
-        // In a real app, you'd have a separate method to fetch the user's list
+        // Fetch user's list
         const myListResponse = await VideoService.showVideoList();
         console.log('My List response:', myListResponse);
         setMyListMovies(myListResponse);
 
+        // For similar movies, we'll use the same data for demonstration
+        // In a real app, you might want to fetch similar movies based on the user's list
+        setSimilarMovies(myListResponse);
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false);
+        setLoading({ myList: false, similar: false });
       }
     };
 
@@ -34,8 +41,8 @@ const MyList = () => {
     // Handle watch now button action
   };
 
-  const handleAddToWatchlist = () => {
-    // Handle add to watchlist button action
+  const handleRemoveFromList = () => {
+    // Handle remove from list button action
   };
 
   return (
@@ -48,13 +55,28 @@ const MyList = () => {
         button1Text="Watch Now"
         button2Text="Remove from List"
         button1Action={handleWatchNow}
-        button2Action={handleAddToWatchlist}
+        button2Action={handleRemoveFromList}
       />
-      <div className="px-8 md:px-16 lg:px-32 mt-8">
+      
+      {/* Full-width separator line above My List */}
+      <hr className="border-t border-gray-700 w-full my-8" />
+      
+      <div className="px-8 md:px-16 lg:px-32">
         <ScrollableRow
           title="My List"
-          loading={loading}
+          loading={loading.myList}
           movies={myListMovies}
+        />
+      </div>
+      
+      {/* Full-width separator line between sections */}
+      <hr className="border-t border-gray-700 w-full my-8" />
+      
+      <div className="px-8 md:px-16 lg:px-32">
+        <ScrollableRow
+          title="Similar to These"
+          loading={loading.similar}
+          movies={similarMovies}
         />
       </div>
       <Footer />
