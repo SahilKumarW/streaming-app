@@ -1,94 +1,7 @@
-import React, { useState } from "react";
-
-// const UserTable = ({ users, onEdit, onDelete }) => {
-//     const [searchTerm, setSearchTerm] = useState("");
-
-//     const handleSearch = (event) => {
-//         setSearchTerm(event.target.value);
-//     };
-
-//     return (
-//         <div className="overflow-x-auto">
-//             {/* "All Users" Heading and Search Box */}
-//             <div className="border-t border-l border-r border-white border-opacity-20 rounded-t-lg bg-stone-900">
-//                 <div className="flex justify-between items-center p-4">
-//                     <p className="text-xl font-semibold text-white">All Users</p>
-//                     <div className="flex items-center bg-stone-900 border border-white border-opacity-20 rounded-md p-1">
-//                         <input
-//                             type="text"
-//                             placeholder="Search User"
-//                             className="bg-stone-900 text-white focus:outline-none"
-//                             value={searchTerm}
-//                             onChange={handleSearch}
-//                         />
-//                         <i className="ri-search-line text-white ml-2"></i>
-//                     </div>
-//                 </div>
-//             </div>
-
-//             {/* User Table with Subtle Column Borders */}
-//             <div className="border-b border-l border-r border-white border-opacity-20 rounded-b-lg overflow-hidden">
-//                 <table className="table-auto w-full bg-black text-white">
-//                     <thead>
-//                         <tr className="border-b border-gray-600">
-//                             <th className="px-4 py-2 border-r border-white border-opacity-10 text-left font-normal">Name</th>
-//                             <th className="px-4 py-2 border-r border-white border-opacity-10 text-left font-normal">Level</th>
-//                             <th className="px-4 py-2 border-r border-white border-opacity-10 text-left font-normal">Account Created Date</th>
-//                             <th className="px-4 py-2 border-r border-white border-opacity-10 text-left font-normal">Subscriptions</th>
-//                             <th className="px-10 py-2 text-left font-normal">Actions</th>
-//                         </tr>
-//                     </thead>
-
-//                     <tbody>
-//                         {users
-//                             .filter((user) =>
-//                                 user.name.toLowerCase().includes(searchTerm.toLowerCase())
-//                             )
-//                             .map((user) => (
-//                                 <tr key={user.id} className="border-b border-gray-600">
-//                                     <td className="px-4 py-2 border-r border-gray-600 flex items-center gap-2 text-left text-sm">
-//                                         <img
-//                                             src={user.avatar}
-//                                             alt={user.name}
-//                                             className="w-8 h-8 rounded-full"
-//                                         />
-//                                         {user.name}
-//                                     </td>
-//                                     <td className="px-4 py-2 border-r border-gray-600 text-left text-sm">{user.level}</td>
-//                                     <td className="px-4 py-2 border-r border-gray-600 text-left text-sm">{user.accountCreated}</td>
-//                                     <td className="px-4 py-2 border-r border-gray-600 text-left text-sm">{user.subscription}</td>
-
-//                                     <td className="px-4 py-2 text-center">
-//                                         <div className="flex justify-center gap-6">
-//                                             <i
-//                                                 className="ri-edit-line cursor-pointer"
-//                                                 onClick={() => onEdit(user.id)}
-//                                             ></i>
-//                                             <i
-//                                                 className="ri-delete-bin-line cursor-pointer"
-//                                                 onClick={() => onDelete(user.id)}
-//                                             ></i>
-//                                         </div>
-//                                     </td>
-//                                 </tr>
-//                             ))}
-//                     </tbody>
-//                 </table>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default UserTable;
-
-
-
-// UserTable.jsx
-
-
+import React from "react";
 
 const UserTable = ({ users, onEdit, onDelete }) => {
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = React.useState("");
 
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
@@ -106,8 +19,9 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                             className="bg-stone-900 text-white focus:outline-none"
                             value={searchTerm}
                             onChange={handleSearch}
+                            aria-label="Search Users"
                         />
-                        <i className="ri-search-line text-white ml-2"></i>
+                        <i className="ri-search-line text-white ml-2" aria-hidden="true"></i>
                     </div>
                 </div>
             </div>
@@ -123,17 +37,47 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {users.filter(user => user.fullName.toLowerCase().includes(searchTerm.toLowerCase())).map((user) => (
-                            <tr key={user.id}>
-                                <td className="p-4">{user.fullName}</td>
-                                <td className="p-4">{user.email}</td>
-                                <td className="p-4">{user.role}</td>
-                                <td className="p-4">
-                                    <button className="text-blue-500 mr-2" onClick={() => onEdit(user)}>Edit</button>
-                                    <button className="text-red-500" onClick={() => onDelete(user.id)}>Delete</button>
+                        {Array.isArray(users) && users.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="p-4 text-center">
+                                    No users found. <button className="text-teal-500" onClick={() => window.location.href = "/addUser"}>Add User</button>
                                 </td>
                             </tr>
-                        ))}
+                        ) : Array.isArray(users) ? (
+                            users
+                                .filter(user =>
+                                    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+                                )
+                                .map((user) => (
+                                    <tr key={user.id}>
+                                        <td className="p-4">{user.name}</td>
+                                        <td className="p-4">{user.email}</td>
+                                        <td className="p-4">{user.role}</td>
+                                        <td className="p-4">
+                                            <button
+                                                className="text-blue-500 mr-2"
+                                                onClick={() => onEdit(user)}
+                                                aria-label={`Edit ${user.name}`}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="text-red-500"
+                                                onClick={() => onDelete(user.id)}
+                                                aria-label={`Delete ${user.name}`}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                        ) : (
+                            <tr>
+                                <td colSpan="4" className="p-4 text-center">Invalid user data.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

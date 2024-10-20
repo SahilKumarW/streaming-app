@@ -126,6 +126,8 @@ function App() {
         <Route path="/tvseries" element={<TvSeries />} />
         <Route path="/mylist" element={<MyList />} />
         <Route path="/player" element={<VideoPlayer />} />
+        <Route path="/videos/:videoId" element={<VideoPlayer />} />
+
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
 
         {/* Dashboard route with nested child routes */}

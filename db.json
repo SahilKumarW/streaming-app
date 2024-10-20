@@ -1,0 +1,76 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "role": "Admin",
+      "status": "Active"
+    },
+    {
+      "id": "2",
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "role": "User",
+      "status": "Active"
+    },
+    {
+      "id": "3",
+      "name": "Michael Johnson",
+      "email": "michael.johnson@example.com",
+      "role": "User",
+      "status": "Blocked"
+    },
+    {
+      "id": "4",
+      "name": "Emily Davis",
+      "email": "emily.davis@example.com",
+      "role": "Moderator",
+      "status": "Active"
+    },
+    {
+      "id": "5",
+      "name": "William Brown",
+      "email": "william.brown@example.com",
+      "role": "User",
+      "status": "Active"
+    }
+  ],
+  "videos": [
+    {
+      "id": "1",
+      "movieName": "Inception",
+      "category": "Action",
+      "genre": "Sci-Fi",
+      "storyLine": "A thief who steals corporate secrets...",
+      "cast": "Leonardo DiCaprio"
+    },
+    {
+      "id": "7699",
+      "video": {},
+      "movieName": "YOU ASKED",
+      "category": "YOU ASKED",
+      "genre": "YOU ASKED",
+      "storyLine": "YOU ASKED",
+      "cast": "YOU ASKED"
+    },
+    {
+      "id": "e1bb",
+      "title": "Video from URL",
+      "description": "Video uploaded by URL.",
+      "videoUrl": "https://youtu.be/uSCHmIQ9mo0?si=fxzkulZcYhVVjYQF"
+    },
+    {
+      "id": "8612",
+      "video": {},
+      "movieName": "IMG_0147",
+      "category": "IMG_0147",
+      "genre": "IMG_0147",
+      "storyLine": "IMG_0147",
+      "cast": "IMG_0147"
+    }
+  ],
+  "favorites": [],
+  "watchHistory": [],
+  "ratings": []
+}

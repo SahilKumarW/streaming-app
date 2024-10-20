@@ -2,19 +2,47 @@ import React, { useEffect, useRef, useState } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import httpSourceSelector from "videojs-http-source-selector";
+import VideoService from "../api/videoService"; // Import the video service
 
 // Register the plugin with Video.js
 videojs.registerPlugin("httpSourceSelector", httpSourceSelector);
 
-const VideoPlayer = () => {
+const VideoPlayer = ({ videoId }) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [videoSources, setVideoSources] = useState([]);
+  const [poster, setPoster] = useState("");
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
 
   useEffect(() => {
     setIsMounted(true);
 
-    if (isMounted && videoRef.current) {
+    // Fetch video data by ID
+    const fetchVideoById = async (id) => {
+      setLoading(true); // Set loading to true before fetching
+      setError(null); // Reset error state before fetch
+      try {
+        const response = await VideoService.getVideoById(id);
+        const videoData = response.data;
+
+        // Assuming the API response contains 'sources' (an array of video sources) and 'poster'
+        setVideoSources(videoData.sources || []);
+        setPoster(videoData.poster || "");
+      } catch (error) {
+        console.error("Error fetching video by ID:", error);
+        setError("Failed to load video. Please try again."); // Set error message
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
+    };
+
+    if (videoId) {
+      fetchVideoById(videoId);
+    }
+
+    if (isMounted && videoRef.current && videoSources.length > 0) {
       playerRef.current = videojs(
         videoRef.current,
         {
@@ -43,24 +71,8 @@ const VideoPlayer = () => {
               "httpSourceSelector", // Quality selection button
             ],
           },
-          sources: [
-            {
-              src: "https://www.w3schools.com/html/mov_bbb.mp4", // Dummy high-quality video
-              type: "video/mp4",
-              label: "1080p",
-            },
-            {
-              src: "https://www.w3schools.com/html/movie.mp4", // Dummy medium-quality video
-              type: "video/mp4",
-              label: "720p",
-            },
-            {
-              src: "https://www.w3schools.com/html/mov_bbb.mp4", // Dummy low-quality video (same as 1080p for example purposes)
-              type: "video/mp4",
-              label: "480p",
-            },
-          ],
-          poster: "https://vjs.zencdn.net/v/oceans.png",
+          sources: videoSources, // Set dynamic video sources
+          poster: poster, // Set dynamic poster
         },
         () => {
           console.log("Player is ready");
@@ -114,16 +126,22 @@ const VideoPlayer = () => {
         }
       };
     }
-  }, [isMounted]);
+  }, [isMounted, videoId, videoSources, poster]);
 
   return (
     <div>
-      <p>Video Player Component</p>
-      <div data-vjs-player>
-        {isMounted && (
-          <video ref={videoRef} className="video-js vjs-big-play-centered" />
-        )}
-      </div>
+      <h2>Video Player Component</h2>
+      {loading ? (
+        <p>Loading...</p> // Show loading state
+      ) : error ? (
+        <p>{error}</p> // Show error message if any
+      ) : (
+        <div data-vjs-player>
+          {isMounted && (
+            <video ref={videoRef} className="video-js vjs-big-play-centered" />
+          )}
+        </div>
+      )}
     </div>
   );
 };
