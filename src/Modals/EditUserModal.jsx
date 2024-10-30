@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const EditUserModal = ({ user, onSave, onClose }) => {
   const [editedUser, setEditedUser] = useState(user);
+
+  useEffect(() => {
+    setEditedUser(user); // Update state when user prop changes
+  }, [user]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -30,6 +34,7 @@ const EditUserModal = ({ user, onSave, onClose }) => {
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border rounded-md"
               placeholder="Full Name"
+              required // Make it required
             />
           </div>
 
@@ -42,6 +47,7 @@ const EditUserModal = ({ user, onSave, onClose }) => {
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border rounded-md"
               placeholder="Email"
+              required // Make it required
             />
           </div>
 
@@ -54,6 +60,7 @@ const EditUserModal = ({ user, onSave, onClose }) => {
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border rounded-md"
               placeholder="Role"
+              required // Make it required
             />
           </div>
 

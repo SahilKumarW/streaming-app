@@ -20,17 +20,21 @@ const Login = ({ onLogin }) => {
 
         // Check for successful login and access token
         if (response.data.apiCode === 0 && response.data.data) {
-          const token = response.data.data.token; // Extract the token
-          const userId = response.data.data.id; // Extract user ID
+          const { token, id: userId, role } = response.data.data; // Extract token, user ID, and role
           console.log("Extracted token:", token); // Log extracted token
 
           if (token) {
-            // Save token to localStorage
+            // Save token, userId, and role to localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('userId', userId);
+            localStorage.setItem('role', role);
+
             toast.success("User Successfully Logged In");
             console.log(localStorage.getItem('token'));
             console.log(localStorage.getItem('userId'));
+            console.log(localStorage.getItem('role'));
+
+            // Navigate to home page
             navigate("/home");
           } else {
             toast.error("Token not found in response!");

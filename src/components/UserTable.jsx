@@ -1,17 +1,35 @@
 import React from "react";
 
-const UserTable = ({ users, onEdit, onDelete }) => {
+const UserTable = ({ users = [], onEdit, onDelete }) => {
     const [searchTerm, setSearchTerm] = React.useState("");
+    const [error, setError] = React.useState(null);
 
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
     };
 
-    const filteredUsers = users.filter(user => 
-        user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.role?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Debounce the search term to optimize performance
+    const debounce = (fn, delay) => {
+        let timeoutId;
+        return (...args) => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            timeoutId = setTimeout(() => {
+                fn(...args);
+            }, delay);
+        };
+    };
+
+    const debouncedSearch = debounce((value) => setSearchTerm(value), 300);
+
+    const filteredUsers = Array.isArray(users)
+        ? users.filter((user) =>
+              user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              user.role?.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        : [];
 
     return (
         <div className="overflow-x-auto">
@@ -23,8 +41,7 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                             type="text"
                             placeholder="Search User"
                             className="bg-stone-900 text-white focus:outline-none"
-                            value={searchTerm}
-                            onChange={handleSearch}
+                            onChange={(e) => debouncedSearch(e.target.value)}
                             aria-label="Search Users"
                         />
                         <i className="ri-search-line text-white ml-2" aria-hidden="true"></i>
@@ -46,13 +63,16 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                         {filteredUsers.length === 0 ? (
                             <tr>
                                 <td colSpan="4" className="p-4 text-center">
-                                    No users found. <button className="text-teal-500" onClick={() => window.location.href = "/addUser"}>Add User</button>
+                                    No users found.{" "}
+                                    <button className="text-teal-500" onClick={() => window.location.href = "/addUser"}>
+                                        Add User
+                                    </button>
                                 </td>
                             </tr>
                         ) : (
                             filteredUsers.map((user) => (
                                 <tr key={user.id}>
-                                    <td className="p-4">{user.fullName}</td>
+                                    <td className="p-4">{user.name}</td>
                                     <td className="p-4">{user.email}</td>
                                     <td className="p-4">{user.role}</td>
                                     <td className="p-4">
@@ -62,14 +82,18 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                                                 console.log("Editing user:", user);
                                                 onEdit(user);
                                             }}
-                                            aria-label={`Edit ${user.fullName}`}
+                                            aria-label={`Edit ${user.name}`}
                                         >
                                             Edit
                                         </button>
                                         <button
                                             className="text-red-500"
-                                            onClick={() => onDelete(user.id)}
-                                            aria-label={`Delete ${user.fullName}`}
+                                            onClick={() => {
+                                                if (window.confirm(`Are you sure you want to delete ${user.name}?`)) {
+                                                    onDelete(user.id);
+                                                }
+                                            }}
+                                            aria-label={`Delete ${user.name}`}
                                         >
                                             Delete
                                         </button>

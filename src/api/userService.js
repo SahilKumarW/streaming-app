@@ -4,30 +4,34 @@ const BASE_URL = '/Users';
 
 // Function to get the token and userId
 const getAuthData = () => {
-    const token = localStorage.getItem('token'); // Retrieve token from local storage
-    const userId = localStorage.getItem('userId'); // Retrieve userId from local storage
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
 
     if (!userId) {
         console.error("User ID not found. Please log in again.");
     }
 
-    return { token, userId }; // Return both token and userId
+    return { token, userId };
 };
 
-// UserService with updated endpoint functions
 const UserService = {
-    // Get all users
+    // Get all users if role is Admin
     getAllUsers: async () => {
-        const { token } = getAuthData(); // Retrieve token
-        if (!token) return;
+        const { token } = getAuthData();
+        const role = localStorage.getItem('role');
+
+        if (role !== 'Admin') {
+            console.error("Access denied: Only Admins can access this endpoint.");
+            return Promise.reject("Access denied: Only Admins can access this endpoint.");
+        }
 
         try {
             return await get(`${BASE_URL}/get-all-users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
         } catch (error) {
-            console.error("Error fetching all users:", error);
-            throw error; // Re-throw to handle in the calling component
+            console.error("Error fetching users:", error);
+            throw error;
         }
     },
 
@@ -38,17 +42,26 @@ const UserService = {
 
     // Update user
     updateUser: async (user) => {
-        return await patch(`${BASE_URL}/update-user`, user);
+        const { token } = getAuthData();
+        return await patch(`${BASE_URL}/update-user/${user.id}`, user, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
     },
 
     // Add user
     addUser: async (user) => {
-        return await post(`${BASE_URL}/add-user`, user);
+        const { token } = getAuthData();
+        return await post(`${BASE_URL}/add-user`, user, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
     },
 
     // Delete user
     deleteUser: async (userId) => {
-        return await deleteRequest(`${BASE_URL}/delete-user/${userId}`);
+        const { token } = getAuthData();
+        return await deleteRequest(`${BASE_URL}/delete-user/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
     },
 };
 

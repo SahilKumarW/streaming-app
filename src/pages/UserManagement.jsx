@@ -5,31 +5,33 @@ import UserTable from "../components/UserTable";
 import EditUserModal from "../Modals/EditUserModal";
 import tom from "/Assets/tom.jpg";
 import UserService from '../api/userService'; // Adjust the path as necessary
- // Import user service functions
 
 const UserManagement = () => {
     const navigate = useNavigate();
-
-    const [users, setUsers] = useState([]); // State for managing users
-    const [loading, setLoading] = useState(true); // State for loading indicator
-    const [error, setError] = useState(null); // State for error handling
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [activeTab, setActiveTab] = useState("users");
 
-    // Fetch all users from the API
     useEffect(() => {
         fetchUsers();
     }, []);
 
     const fetchUsers = async () => {
         try {
-            const userList = await UserService.getAllUsers();
-            setUsers(userList);
-            setLoading(false);
+            const response = await UserService.getAllUsers();
+            console.log("Fetched user list:", response);
+            if (response.apiCode === 0 && Array.isArray(response.data)) {
+                setUsers(response.data); // Set the users from the 'data' array
+            } else {
+                throw new Error(response.displayMessage || "Fetched data is not an array");
+            }
         } catch (err) {
             console.error("Error fetching users:", err);
             setError("Failed to load users.");
+        } finally {
             setLoading(false);
         }
     };
@@ -43,8 +45,9 @@ const UserManagement = () => {
         try {
             console.log('Saving edited user:', updatedUser);
             const response = await UserService.updateUser(updatedUser);
-            console.log("Update response:", response);
-            setUsers(users.map((user) => (user.id === updatedUser.id ? response : user)));
+            setUsers((prevUsers) =>
+                prevUsers.map((user) => (user.id === updatedUser.id ? response : user))
+            );
             setIsEditing(false);
             setCurrentUser(null);
             console.log("User has been updated:", response);
@@ -55,24 +58,16 @@ const UserManagement = () => {
     };
 
     const handleDelete = async (userId) => {
-        try {
-            console.log(`Attempting to delete user with ID: ${userId}`);
-            await UserService.deleteUser(userId);
-            setUsers(users.filter((user) => user.id !== userId));
-            console.log(`User with ID ${userId} has been deleted!`);
-        } catch (err) {
-            console.error("Error deleting user:", err);
-            if (err.response) {
-                console.error("Error response:", err.response);
-                console.error("Error data:", err.response.data);
-                console.error("Error status:", err.response.status);
-                console.error("Error headers:", err.response.headers);
-            } else if (err.request) {
-                console.error("Error request:", err.request);
-            } else {
-                console.error("Error message:", err.message);
+        if (window.confirm("Are you sure you want to delete this user?")) {
+            try {
+                console.log(`Attempting to delete user with ID: ${userId}`);
+                await UserService.deleteUser(userId);
+                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+                console.log(`User with ID ${userId} has been deleted!`);
+            } catch (err) {
+                console.error("Error deleting user:", err);
+                setError("Failed to delete user. Please try again.");
             }
-            setError("Failed to delete user. Please try again.");
         }
     };
 
@@ -125,7 +120,7 @@ const UserManagement = () => {
                         {loading ? (
                             <p>Loading users...</p>
                         ) : error ? (
-                            <p>{error}</p>
+                            <p className="text-red-500">{error}</p>
                         ) : (
                             <UserTable
                                 users={users}
@@ -138,13 +133,13 @@ const UserManagement = () => {
                         <div className="flex justify-end gap-2 mt-4">
                             <button
                                 onClick={handleBulkAction}
-                                className="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
+                                className="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600"
                             >
-                                Bulk Action
+                                Bulk Actions
                             </button>
                             <button
                                 onClick={handleBlockUser}
-                                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500 transition"
+                                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500"
                             >
                                 Block User
                             </button>
@@ -153,14 +148,14 @@ const UserManagement = () => {
                 )}
             </div>
 
-            {isEditing && currentUser && (
+            {isEditing && (
                 <EditUserModal
                     user={currentUser}
-                    onSave={handleSaveEdit}
                     onClose={() => {
                         setIsEditing(false);
                         setCurrentUser(null);
                     }}
+                    onSave={handleSaveEdit}
                 />
             )}
         </div>
