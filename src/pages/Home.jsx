@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import HeroSection from "../components/HeroSection";
 import ScrollableRow from "../components/ScrollableRow";
 import VideoService from "../api/videoService";
-import Cookies from "js-cookie";
 import homeImage from "../assets/home.png";
 import Footer from "../components/Footer";
 
@@ -18,49 +17,59 @@ const Home = () => {
     continueWatching: true,
   });
 
-  const userId = Cookies.get("userId") || "1"; // Default to "1" if not found
+  const userId = localStorage.getItem("userId") ?? "1"; // Default to "1" if not found
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading({
+        recommended: true,
+        topRated: true,
+        topShows: true,
+        continueWatching: true,
+      });
+
       try {
-        setLoading({
-          recommended: true,
-          topRated: true,
-          topShows: true,
-          continueWatching: true,
-        });
-
-        // Fetch all videos (for recommendations)
+        // Fetch recommended videos
         const allVideos = await VideoService.showVideoList();
-        console.log('All videos:', allVideos);
-        setRecommendedMoviesList(allVideos);
+        console.log('API Response for recommended videos:', allVideos);
+        setRecommendedMoviesList(allVideos.data || []);
+      } catch (error) {
+        console.error("Error fetching recommended movies:", error);
+      }
 
-        // Fetch user watch history
+      try {
+        // Fetch user watch history and mock continue watching data
         const watchHistoryResponse = await VideoService.getUserWatchHistory();
         console.log('User watch history:', watchHistoryResponse);
 
-        // Assuming watch history response contains video details
-        const mockContinueWatching = watchHistoryResponse.map((video, index) => ({
+        const mockContinueWatching = watchHistoryResponse.data.map((video, index) => ({
           ...video,
-          progress: Math.floor(Math.random() * 100), // You can replace this with actual progress if available
+          progress: Math.floor(Math.random() * 100),
           lastWatched: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString(),
           chapter: index + 1,
-          chapterDescription: `The chapter about ${video.name.toLowerCase()} just want to go out from his palace to get freedom...`
+          chapterDescription: `The chapter about ${video.name.toLowerCase()}...`,
         }));
         setContinueWatchingList(mockContinueWatching);
-
-        // Fetch top rated movies
-        const topRatedResponse = await VideoService.getTopRatedMovies();
-        console.log('Top rated response:', topRatedResponse);
-        setTopRatedMoviesList(topRatedResponse);
-
-        // Fetch top TV shows
-        const topTvShowsResponse = await VideoService.getTopRatedTvShows();
-        console.log('Top TV shows response:', topTvShowsResponse);
-        setTopTvShowList(topTvShowsResponse);
-
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching watch history:", error);
+      }
+
+      try {
+        // Fetch top-rated movies
+        const topRatedResponse = await VideoService.getTopRatedMovies();
+        console.log('Top-rated movies:', topRatedResponse);
+        setTopRatedMoviesList(topRatedResponse.data || []);
+      } catch (error) {
+        console.error("Error fetching top-rated movies:", error);
+      }
+
+      try {
+        // Fetch top-rated TV shows
+        const topTvShowsResponse = await VideoService.getTopRatedTvShows();
+        console.log('Home - Top-rated TV shows:', topTvShowsResponse);
+        setTopTvShowList(topTvShowsResponse);
+      } catch (error) {
+        console.error("Error fetching top TV shows:", error);
       } finally {
         setLoading({
           recommended: false,

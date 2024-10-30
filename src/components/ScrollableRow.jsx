@@ -46,7 +46,7 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
           </button>
           <div
             ref={scrollRef}
-            className="overflow-x-scroll scrollbar-hide flex space-x-4"
+            className="flex"
             style={{ scrollbarWidth: "none" }}
           >
             {/* Movie cards */}

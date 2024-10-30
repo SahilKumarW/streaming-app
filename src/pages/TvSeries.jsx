@@ -5,36 +5,39 @@ import VideoService from "../api/videoService";
 import Footer from "../components/Footer";
 import tvSeriesImage from "../assets/TvSeries.png";
 import tvSeriesEpisodeImage from "../assets/TvSeries.png";
+import { toast } from "react-toastify"; // Ensure to import toast for error handling
 
 const TvSeries = () => {
   const [continueWatchingList, setContinueWatchingList] = useState([]);
   const [similarTvShowList, setSimilarTvShowList] = useState([]);
-  const [topRatedTvShowList, setTopRatedTvShowList] = useState([]); // New state for top-rated TV shows
+  const [topRatedTvShowList, setTopRatedTvShowList] = useState([]);
   const [loading, setLoading] = useState({
     continueWatching: true,
     similar: true,
-    topRated: true, // Loading state for top-rated TV shows
+    topRated: true,
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Set all loading states to true
         setLoading({ continueWatching: true, similar: true, topRated: true });
 
         // Fetch all videos
         const allVideosResponse = await VideoService.showVideoList();
-        console.log('API Response:', allVideosResponse); // Log the full API response
+        console.log('API Response:', allVideosResponse);
 
         const allVideos = Array.isArray(allVideosResponse.data) ? allVideosResponse.data : [];
-        console.log('All videos:', allVideos); // Log the videos data
+        console.log('All videos:', allVideos);
 
-        // Fetch top-rated TV shows (assuming this endpoint exists)
+        // Fetch top-rated TV shows
         const topRatedShowsResponse = await VideoService.getTopRatedTvShows();
-        const topRatedShows = Array.isArray(topRatedShowsResponse.data) ? topRatedShowsResponse.data : []; // Safely handle the response
-        console.log('Top-rated TV shows:', topRatedShows);
+        console.log('Tvseries - Top-rated TV shows response:', topRatedShowsResponse);
 
-        // Filter top-rated TV shows and set state
-        setTopRatedTvShowList(topRatedShows);
+        const topRatedShows = Array.isArray(topRatedShowsResponse.data) ? topRatedShowsResponse.data : [];
+        console.log('Processed Top-rated TV shows:', topRatedShows);
+
+        setTopRatedTvShowList(topRatedShowsResponse);
 
         // Mock continue watching list
         const mockContinueWatching = Array(12).fill().map((_, index) => ({
@@ -51,15 +54,16 @@ const TvSeries = () => {
         }));
         setContinueWatchingList(mockContinueWatching);
 
-        // Filter similar TV shows from all videos
+        // Filter similar TV shows from all videos based on category "TVShows"
         const filteredSimilarShows = allVideos.filter(video => video.category === "TVShows");
         setSimilarTvShowList(filteredSimilarShows);
         console.log('Filtered Similar TV Shows:', filteredSimilarShows);
 
       } catch (error) {
         console.error("Error fetching data:", error);
-        toast.error("Failed to fetch data. Please try again later."); // Notify user on error
+        toast.error("Failed to fetch data. Please try again later.");
       } finally {
+        // Set all loading states to false
         setLoading({ continueWatching: false, similar: false, topRated: false });
       }
     };
@@ -102,7 +106,7 @@ const TvSeries = () => {
           <p className="text-white text-xl md:text-2xl lg:text-3xl font-bold ">1-12 Episode</p>
         </div>
         <ScrollableRow
-          title=""
+          title="Continue Watching"
           loading={loading.continueWatching}
           movies={continueWatchingList}
           showProgress={true}
@@ -113,10 +117,13 @@ const TvSeries = () => {
           movies={similarTvShowList}
         />
         <ScrollableRow
-          title="Top Rated TV Shows" // Title for top-rated TV shows
-          loading={loading.topRated} // Loading state
-          movies={topRatedTvShowList} // Set the top-rated TV shows list
+          title="Top Rated TV Shows"
+          loading={loading.topRated}
+          movies={topRatedTvShowList} // Use the state variable for top-rated shows
         />
+        {topRatedTvShowList.length === 0 && !loading.topRated && (
+          <p className="text-white">No top-rated TV shows found. Showing latest uploaded TV shows.</p>
+        )}
       </div>
       <Footer />
     </>

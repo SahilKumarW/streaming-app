@@ -2,11 +2,33 @@ import { get, post, patch, deleteRequest } from './axios';
 
 const BASE_URL = '/Users';
 
+// Function to get the token and userId
+const getAuthData = () => {
+    const token = localStorage.getItem('token'); // Retrieve token from local storage
+    const userId = localStorage.getItem('userId'); // Retrieve userId from local storage
+
+    if (!userId) {
+        console.error("User ID not found. Please log in again.");
+    }
+
+    return { token, userId }; // Return both token and userId
+};
+
 // UserService with updated endpoint functions
 const UserService = {
     // Get all users
     getAllUsers: async () => {
-        return await get(`${BASE_URL}/get-all-users`);
+        const { token } = getAuthData(); // Retrieve token
+        if (!token) return;
+
+        try {
+            return await get(`${BASE_URL}/get-all-users`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+        } catch (error) {
+            console.error("Error fetching all users:", error);
+            throw error; // Re-throw to handle in the calling component
+        }
     },
 
     // Get user by ID

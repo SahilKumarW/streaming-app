@@ -128,9 +128,8 @@ const VideoService = {
     // Get user watch history
     getUserWatchHistory: async () => {
         const { token, userId } = getAuthData(); // Get userId for the request
-        return await get(`${BASE_URL}/get-user-watch-history`, {
+        return await get(`${BASE_URL}/get-user-watch-history?userId=${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
-            params: { userId },
         });
     },
 
