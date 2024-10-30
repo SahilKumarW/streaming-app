@@ -1,32 +1,32 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
-
 import edit from '../assets/edit.svg';
 import arrow from '../assets/arrow.svg';
 import Modal from '../Modals/Modal';
 import { FaCamera } from 'react-icons/fa';
 import profile from "/Assets/profile.png";
 import CustomInput from '../components/CustomeInput';
-import UserService from '../api/userService';
+import UserService from '../api/userService'; // Importing UserService
 
 const AddUser = () => {
-    // State for managing modal
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // State for form inputs
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [dob, setDob] = useState('');
     const [role, setRole] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-
-    // State for success/error messages
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState(''); // 'success' or 'error'
 
-    // Handle the form submission
     const handleAddUser = async () => {
+        if (password !== confirmPassword) {
+            setMessage('Passwords do not match.');
+            setMessageType('error');
+            setTimeout(() => setMessage(''), 3000);
+            return;
+        }
+
         try {
             const newUser = {
                 fullName,
@@ -36,7 +36,7 @@ const AddUser = () => {
                 password
             };
 
-            const response = await UserService.addUser(newUser);
+            const response = await UserService.addUser(newUser); // Calling addUser method
 
             setMessage('User added successfully!');
             setMessageType('success');

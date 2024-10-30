@@ -21,10 +21,17 @@ const Movies = () => {
         // Fetch top rated movies
         const topRatedResponse = await VideoService.getTopRatedMovies();
         console.log('Top rated response:', topRatedResponse);
-        setTopRatedMoviesList(topRatedResponse);
 
-        // For similar movies, we'll use the same data for demonstration
-        setSimilarMoviesList(topRatedResponse);
+        // Check for data and set it
+        if (topRatedResponse.apiCode === 0 && topRatedResponse.data.length > 0) {
+          setTopRatedMoviesList(topRatedResponse.data); // Set the movie data from the response
+        } else {
+          console.log(topRatedResponse.displayMessage); // Handle the case where no movies are found
+          setTopRatedMoviesList([]); // You can set this to some fallback data or an empty array
+        }
+
+        // For similar movies, you could implement a similar fetch or just use the same for now
+        setSimilarMoviesList(topRatedResponse.data); // This can be adjusted later based on your needs
 
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -69,12 +76,12 @@ const Movies = () => {
         <ScrollableRow
           title="Top Rated Movies"
           loading={loading.topRated}
-          movies={topRatedMoviesList}
+          movies={topRatedMoviesList} // Pass the movies here
         />
         <ScrollableRow
           title="Similar Movies"
           loading={loading.similar}
-          movies={similarMoviesList}
+          movies={similarMoviesList} // You can change this later to fetch actual similar movies
         />
       </div>
       <Footer />

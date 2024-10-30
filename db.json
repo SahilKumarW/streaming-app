@@ -44,11 +44,19 @@
   "users": [
     {
       "id": "13b0",
-      "fullName": "hiba ",
-      "email": "hibafareed@example.com",
+      "fullName": "sahil sahil",
+      "email": "sahil@example.com",
       "dob": "8-5-2005",
       "role": "senior developer",
       "password": "123"
+    },
+    {
+      "id": "0cb1",
+      "fullName": "usman",
+      "email": "usman@example.com",
+      "dob": "26/10/2003",
+      "role": "frontend developer",
+      "password": "12345678"
     }
   ],
   "watchHistory": [

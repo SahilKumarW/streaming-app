@@ -42,22 +42,20 @@ function MockLogin() {
       });
 
       if (response.apiCode === 0) {
-        let expireTime = new Date(response.data.expireTime); // convert to Date object
+        // Store the token in localStorage
+        localStorage.setItem("accessToken", response.data?.token);
 
-        navigate("/home");
+        // Optionally store other user details
+        localStorage.setItem("userId", response.data?.id);
+
         toast.success("User Login Successfully");
-
-        Cookies.set("accessToken", response.data?.token, {
-          expires: expireTime,
-        });
-        Cookies.set("userId", response.data?.id, {
-          expires: expireTime, // Must be a valid Date object
-        });
+        navigate("/home");
       } else {
         toast.error(response.displayMessage || "Backend Server Error");
       }
     } catch (error) {
-      throw error;
+      console.error(error);
+      toast.error("An error occurred. Please try again.");
     }
   };
 

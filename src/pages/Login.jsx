@@ -11,14 +11,41 @@ const Login = ({ onLogin }) => {
 
   const login = (values) => {
     axios
-      .post("http://streamapp2-env.eba-jqkp2xdu.us-east-2.elasticbeanstalk.com/api/auth", { username: values.email, password: values.password }) 
+      .post("http://streamapp2-env.eba-jqkp2xdu.us-east-2.elasticbeanstalk.com/api/auth", {
+        username: values.email,
+        password: values.password,
+      })
       .then((response) => {
-        toast.success("User Sucessfully Logged In")
-        navigate("/home");
+        console.log("Response from login:", response.data); // Log response data
+
+        // Check for successful login and access token
+        if (response.data.apiCode === 0 && response.data.data) {
+          const token = response.data.data.token; // Extract the token
+          const userId = response.data.data.id; // Extract user ID
+          console.log("Extracted token:", token); // Log extracted token
+
+          if (token) {
+            // Save token to localStorage
+            localStorage.setItem('token', token);
+            localStorage.setItem('userId', userId);
+            toast.success("User Successfully Logged In");
+            console.log(localStorage.getItem('token'));
+            console.log(localStorage.getItem('userId'));
+            navigate("/home");
+          } else {
+            toast.error("Token not found in response!");
+          }
+        } else {
+          toast.error("Email or password is incorrect!");
+        }
       })
       .catch((error) => {
-        toast.error("email or password is incorrect!")
         console.log("Login failed:", error);
+        if (error.response && error.response.status === 401) {
+          toast.error("Email or password is incorrect!");
+        } else {
+          toast.error("An unexpected error occurred. Please try again.");
+        }
       });
   };
 

@@ -36,18 +36,24 @@ const Signup = () => {
         dateOfBirth: new Date(values.dateOfBirth).toISOString(), // Ensure date format is correct
       });
 
-      console.log(response,'responseresponse')
       // Check if the response indicates success
       if (response.displayMessage === 'User added successfully.') {
         toast.success(response.displayMessage);
         navigate("/login"); // Redirect to login after successful registration
       } else {
-        toast.error(response.displayMessage);
-        throw new Error("Registration failed"); // Handle other statuses
+        throw new Error(response.displayMessage || "Registration failed");
       }
     } catch (error) {
-      console.error("Error:", error);
-      setErrorMessage(error.message); // Set error message for user feedback
+      // Improved error handling
+      console.error("Error during signup:", error);
+      if (error.response && error.response.data) {
+        const serverError = error.response.data.displayMessage || "An error occurred. Please try again.";
+        setErrorMessage(serverError); // Set error message for user feedback
+        toast.error(serverError); // Toast the error message
+      } else {
+        setErrorMessage(error.message || "An unexpected error occurred.");
+        toast.error(error.message || "An unexpected error occurred.");
+      }
     } finally {
       setSubmitting(false); // Allow form submission again
       setLoading(false); // Stop loading
@@ -72,14 +78,14 @@ const Signup = () => {
         <div className="mt-[20px]">
           <Formik
             initialValues={{
-              name: "", // Changed from fullName to name
+              name: "",
               email: "",
               phoneNumber: "",
               gender: -1, // Ensure default invalid gender selection
               dateOfBirth: "",
               password: "",
             }}
-            validationSchema={SignupSchema} // ply Yup validation schema
+            validationSchema={SignupSchema} // Apply Yup validation schema
             onSubmit={(values, { setSubmitting }) => {
               handleSignup(values, setSubmitting);
             }}
@@ -140,7 +146,6 @@ const Signup = () => {
                 <Field
                   type="date"
                   name="dateOfBirth"
-                  placeholder="Date of Birth"
                   className="w-[311px] h-[56px] rounded-[14px] border border-white bg-black text-white text-[12px] font-medium leading-[18px] px-4 mb-4 placeholder-gray-500"
                 />
                 <ErrorMessage

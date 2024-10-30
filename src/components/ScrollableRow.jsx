@@ -31,7 +31,7 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
           </div>
         )}
       </div>
-      
+
       {loading ? (
         <div className="flex justify-center items-center h-48">
           <ClipLoader color={"#fff"} loading={true} size={50} />
@@ -74,8 +74,8 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
                         <span>{formatTime(120)}</span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-1">
-                        <div 
-                          className="bg-green-500 h-1 rounded-full" 
+                        <div
+                          className="bg-green-500 h-1 rounded-full"
                           style={{ width: `${movie.progress}%` }}
                         ></div>
                       </div>
@@ -87,10 +87,11 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
                       </h3>
                       <div className="flex items-center mb-2">
                         <FaStar className="text-yellow-400 mr-1" />
-                        <span className="text-yellow-400 mr-2">{movie.rating.toFixed(1)}</span>
-                        <span className="text-gray-400 mx-2">|</span>
-                        <span className="text-gray-400">{movie.genre}</span>
+                        <span className="text-gray-300">{movie.rating || "N/A"}</span>
                       </div>
+                      <p className="text-sm text-gray-400">
+                        {movie.description}
+                      </p>
                     </div>
                   )}
                 </div>

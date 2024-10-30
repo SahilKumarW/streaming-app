@@ -1,36 +1,33 @@
-// userService.js
+import { get, post, patch, deleteRequest } from './axios';
 
-import { get, post, patch, deleteRequest } from './axios'; // Change 'put' to 'patch'
+const BASE_URL = '/Users';
 
-const BASE_URL = 'http://localhost:3001/users';
-
+// UserService with updated endpoint functions
 const UserService = {
-    addUser: async (user) => {
-        return await post(BASE_URL, user);
-    },
-    // Add other functions like getAllUsers, getUserById, updateUser, deleteUser
+    // Get all users
     getAllUsers: async () => {
-        return await get(BASE_URL);
+        return await get(`${BASE_URL}/get-all-users`);
     },
+
+    // Get user by ID
     getUserById: async (userId) => {
-        return await get(`${BASE_URL}/${userId}`);
+        return await get(`${BASE_URL}/get-user-by-id/${userId}`);
     },
+
+    // Update user
     updateUser: async (user) => {
-        console.log('Updating user:', user);
-        console.log('Request URL:', `${BASE_URL}/${user.id}`);
-        return await patch(`${BASE_URL}/${user.id}`, user);
+        return await patch(`${BASE_URL}/update-user`, user);
     },
+
+    // Add user
+    addUser: async (user) => {
+        return await post(`${BASE_URL}/add-user`, user);
+    },
+
+    // Delete user
     deleteUser: async (userId) => {
-        console.log(`Attempting to delete user with ID: ${userId}`);
-        try {
-            const response = await deleteRequest(`${BASE_URL}/${userId}`);
-            console.log(`Delete response for user ${userId}:`, response);
-            return response;
-        } catch (error) {
-            console.error(`Error deleting user with ID ${userId}:`, error);
-            throw error;
-        }
+        return await deleteRequest(`${BASE_URL}/delete-user/${userId}`);
     },
 };
 
-export default UserService; // Ensure you are exporting the UserService object
+export default UserService;

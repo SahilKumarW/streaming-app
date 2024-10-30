@@ -30,15 +30,19 @@ const Home = () => {
           continueWatching: true,
         });
 
-        // Fetch all videos (for recommendations and continue watching)
+        // Fetch all videos (for recommendations)
         const allVideos = await VideoService.showVideoList();
         console.log('All videos:', allVideos);
         setRecommendedMoviesList(allVideos);
 
-        // Create mock continue watching data
-        const mockContinueWatching = allVideos.slice(0, 5).map((video, index) => ({
+        // Fetch user watch history
+        const watchHistoryResponse = await VideoService.getUserWatchHistory();
+        console.log('User watch history:', watchHistoryResponse);
+
+        // Assuming watch history response contains video details
+        const mockContinueWatching = watchHistoryResponse.map((video, index) => ({
           ...video,
-          progress: Math.floor(Math.random() * 100),
+          progress: Math.floor(Math.random() * 100), // You can replace this with actual progress if available
           lastWatched: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString(),
           chapter: index + 1,
           chapterDescription: `The chapter about ${video.name.toLowerCase()} just want to go out from his palace to get freedom...`

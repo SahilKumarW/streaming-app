@@ -9,21 +9,34 @@ import tvSeriesEpisodeImage from "../assets/TvSeries.png";
 const TvSeries = () => {
   const [continueWatchingList, setContinueWatchingList] = useState([]);
   const [similarTvShowList, setSimilarTvShowList] = useState([]);
+  const [topRatedTvShowList, setTopRatedTvShowList] = useState([]); // New state for top-rated TV shows
   const [loading, setLoading] = useState({
     continueWatching: true,
     similar: true,
+    topRated: true, // Loading state for top-rated TV shows
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading({ continueWatching: true, similar: true });
+        setLoading({ continueWatching: true, similar: true, topRated: true });
 
         // Fetch all videos
-        const allVideos = await VideoService.showVideoList();
-        console.log('All videos:', allVideos);
+        const allVideosResponse = await VideoService.showVideoList();
+        console.log('API Response:', allVideosResponse); // Log the full API response
 
-        // Create mock continue watching data for TV series
+        const allVideos = Array.isArray(allVideosResponse.data) ? allVideosResponse.data : [];
+        console.log('All videos:', allVideos); // Log the videos data
+
+        // Fetch top-rated TV shows (assuming this endpoint exists)
+        const topRatedShowsResponse = await VideoService.getTopRatedTvShows();
+        const topRatedShows = Array.isArray(topRatedShowsResponse.data) ? topRatedShowsResponse.data : []; // Safely handle the response
+        console.log('Top-rated TV shows:', topRatedShows);
+
+        // Filter top-rated TV shows and set state
+        setTopRatedTvShowList(topRatedShows);
+
+        // Mock continue watching list
         const mockContinueWatching = Array(12).fill().map((_, index) => ({
           id: `episode-${index + 1}`,
           name: `Episode ${index + 1}`,
@@ -34,17 +47,20 @@ const TvSeries = () => {
           progress: Math.floor(Math.random() * 100),
           lastWatched: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString(),
           chapter: index + 1,
-          chapterDescription: `Joel and Ellie continue their perilous journey across a post-apocalyptic America.`
+          chapterDescription: `Joel and Ellie continue their perilous journey across a post-apocalyptic America.`,
         }));
         setContinueWatchingList(mockContinueWatching);
 
-        // For similar TV shows, we'll use the same data for demonstration
-        setSimilarTvShowList(allVideos.filter(video => video.category === "TV Show"));
+        // Filter similar TV shows from all videos
+        const filteredSimilarShows = allVideos.filter(video => video.category === "TVShows");
+        setSimilarTvShowList(filteredSimilarShows);
+        console.log('Filtered Similar TV Shows:', filteredSimilarShows);
 
       } catch (error) {
         console.error("Error fetching data:", error);
+        toast.error("Failed to fetch data. Please try again later."); // Notify user on error
       } finally {
-        setLoading({ continueWatching: false, similar: false });
+        setLoading({ continueWatching: false, similar: false, topRated: false });
       }
     };
 
@@ -95,6 +111,11 @@ const TvSeries = () => {
           title="Similar TV Shows"
           loading={loading.similar}
           movies={similarTvShowList}
+        />
+        <ScrollableRow
+          title="Top Rated TV Shows" // Title for top-rated TV shows
+          loading={loading.topRated} // Loading state
+          movies={topRatedTvShowList} // Set the top-rated TV shows list
         />
       </div>
       <Footer />
