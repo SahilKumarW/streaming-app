@@ -46,15 +46,14 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
           </button>
           <div
             ref={scrollRef}
-            className="flex"
+            className="flex gap-4 overflow-x-hidden"
             style={{ scrollbarWidth: "none" }}
           >
-            {/* Movie cards */}
             {movies.length > 0 ? (
               movies.map((movie, index) => (
                 <div
                   key={index}
-                  className="min-w-[300px] rounded-lg overflow-hidden relative flex-shrink-0"
+                  className="min-w-[calc(33.333%-1rem)] w-[calc(33.333%-1rem)] rounded-lg overflow-hidden relative flex-shrink-0"
                 >
                   <img
                     src={movie.imageUrl}
