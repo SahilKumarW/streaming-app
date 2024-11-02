@@ -1,15 +1,33 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FaStar, FaChevronLeft, FaChevronRight, FaChevronDown } from "react-icons/fa";
+import VideoService from "../api/videoService";
 
 const ScrollableRow = ({ title, movies, loading, showProgress }) => {
   const scrollRef = useRef(null);
+  const [hoverRating, setHoverRating] = useState({});
+  const [currentRating, setCurrentRating] = useState({});
 
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { current } = scrollRef;
       const scrollAmount = direction === "left" ? -current.offsetWidth : current.offsetWidth;
       current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  const handleRating = async (movieId, rating) => {
+    setCurrentRating((prev) => ({ ...prev, [movieId]: rating }));
+
+    try {
+      await VideoService.rateVideo({
+        videoId: movieId,
+        userId: localStorage.getItem("userId"),
+        rating,
+      });
+      console.log(`Rated video ${movieId} with ${rating} stars`);
+    } catch (error) {
+      console.error("Error rating video:", error);
     }
   };
 
@@ -91,6 +109,21 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
                       <p className="text-sm text-gray-400">
                         {movie.description}
                       </p>
+                      <div className="flex items-center mt-2">
+                        {[...Array(5)].map((_, starIndex) => (
+                          <FaStar
+                            key={starIndex}
+                            className={`cursor-pointer ${
+                              starIndex + 1 <= (hoverRating[movie.id] || currentRating[movie.id] || 0)
+                                ? "text-yellow-400"
+                                : "text-gray-400"
+                            }`}
+                            onMouseEnter={() => setHoverRating((prev) => ({ ...prev, [movie.id]: starIndex + 1 }))}
+                            onMouseLeave={() => setHoverRating((prev) => ({ ...prev, [movie.id]: currentRating[movie.id] || 0 }))}
+                            onClick={() => handleRating(movie.id, starIndex + 1)}
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

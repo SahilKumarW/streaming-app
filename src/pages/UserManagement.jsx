@@ -122,12 +122,14 @@ const UserManagement = () => {
                         ) : error ? (
                             <p className="text-red-500">{error}</p>
                         ) : (
-                            <UserTable
-                                users={users}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                className="rounded-lg"
-                            />
+                            // Wrapping UserTable in a scrollable container
+                            <div className="overflow-y-auto max-h-96 rounded-lg">
+                                <UserTable
+                                    users={users}
+                                    onDelete={handleDelete}
+                                    onUserUpdate={handleSaveEdit}
+                                />
+                            </div>
                         )}
 
                         <div className="flex justify-end gap-2 mt-4">

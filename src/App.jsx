@@ -28,6 +28,7 @@ import AddUser from "./pages/AddUser";
 import UploadVideo from "./pages/UploadVideo";
 import UserManagement from "./pages/UserManagement";
 import VideoManagement from "./pages/VideoManagement";
+import UserTable from "./components/UserTable";
 
 
 // Mock Navigation for the video
@@ -130,15 +131,15 @@ function App() {
 
         {/* Dashboard route with nested child routes */}
         <Route path="/dashboard" element={<Dashboard />}>
-          {/* <Route index element={<DashboardHome />} /> */}
-          <Route path="user-management" element={<UserManagement />} />
-          <Route path="video-management" element={<VideoManagement />} />
+          <Route path="user-management" element={<UserManagement />}>
+            <Route path=":userId" element={<UserTable />} />
+          </Route>
+          <Route path="video-management" element={<VideoManagement />}>
+            <Route path=":id" component={VideoManagement} />
+          </Route>
         </Route>
-
-
         <Route path="/addUser" element={<AddUser />} />
         <Route path="/uploadVideo" element={<UploadVideo />} />
-
       </Routes>
     </Router>
   );

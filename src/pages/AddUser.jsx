@@ -4,20 +4,26 @@ import edit from '../assets/edit.svg';
 import arrow from '../assets/arrow.svg';
 import Modal from '../Modals/Modal';
 import { FaCamera } from 'react-icons/fa';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import eye icons
+import { FaCalendarAlt } from 'react-icons/fa'; // Import calendar icon
 import profile from "/Assets/profile.png";
 import CustomInput from '../components/CustomeInput';
-import UserService from '../api/userService'; // Importing UserService
+import UserService from '../api/userService';
+import { v4 as uuidv4 } from 'uuid'; // For autogenerating id
 
 const AddUser = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [fullName, setFullName] = useState('');
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [dob, setDob] = useState('');
-    const [role, setRole] = useState('');
+    const [phone, setPhone] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState('');
+    const [role, setRole] = useState('Student');
+    const [gender, setGender] = useState(0); // Assuming 0 is male
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+    const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
 
     const handleAddUser = async () => {
         if (password !== confirmPassword) {
@@ -29,23 +35,30 @@ const AddUser = () => {
 
         try {
             const newUser = {
-                fullName,
+                id: uuidv4(), // Autogenerate ID
+                name,
                 email,
-                dob,
+                phone,
+                dateOfBirth,
+                gender,
+                password,
                 role,
-                password
+                userType: 0, // Default userType
+                status: true, // Default status
             };
 
-            const response = await UserService.addUser(newUser); // Calling addUser method
+            const response = await UserService.addUser(newUser);
 
             setMessage('User added successfully!');
             setMessageType('success');
 
             // Clear form fields
-            setFullName('');
+            setName('');
             setEmail('');
-            setDob('');
-            setRole('');
+            setPhone('');
+            setDateOfBirth('');
+            setRole('Student');
+            setGender(0);
             setPassword('');
             setConfirmPassword('');
 
@@ -55,7 +68,6 @@ const AddUser = () => {
             console.error('Error adding user:', error);
             setMessage('Failed to add user.');
             setMessageType('error');
-
             setTimeout(() => setMessage(''), 3000);
         }
     };
@@ -66,6 +78,11 @@ const AddUser = () => {
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
+    };
+
+    // Function to toggle password visibility
+    const togglePasswordVisibility = () => {
+        setShowPassword(prevState => !prevState);
     };
 
     return (
@@ -93,12 +110,30 @@ const AddUser = () => {
 
                 {/* Form */}
                 <div className='mt-[50px]'>
-                    <CustomInput placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                    <CustomInput placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} />
                     <CustomInput placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} icon={<img src={edit} />} />
-                    <CustomInput placeholder="Date of Birth" value={dob} onChange={(e) => setDob(e.target.value)} icon={<img src={edit} />} />
-                    <CustomInput placeholder="Enter Role" value={role} onChange={(e) => setRole(e.target.value)} icon={<img src={arrow} />} />
-                    <CustomInput placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value)} icon={<img src={edit} />} />
-                    <CustomInput placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} icon={<img src={edit} />} />
+                    <CustomInput placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} icon={<img src={edit} />} />
+                    <CustomInput 
+                        placeholder="Date of Birth" 
+                        value={dateOfBirth} 
+                        onChange={(e) => setDateOfBirth(e.target.value)} 
+                        icon={<FaCalendarAlt />} // Use calendar icon
+                    />
+                    <CustomInput placeholder="Role" value={role} onChange={(e) => setRole(e.target.value)} icon={<img src={arrow} />} />
+                    <CustomInput 
+                        placeholder="Password" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)} 
+                        type={showPassword ? 'text' : 'password'} // Toggle password visibility
+                        icon={showPassword ? <FaEye onClick={togglePasswordVisibility} /> : <FaEyeSlash onClick={togglePasswordVisibility} />} // Use eye icon
+                    />
+                    <CustomInput 
+                        placeholder="Confirm Password" 
+                        value={confirmPassword} 
+                        onChange={(e) => setConfirmPassword(e.target.value)} 
+                        type={showPassword ? 'text' : 'password'} // Toggle password visibility
+                        icon={showPassword ? <FaEye onClick={togglePasswordVisibility} /> : <FaEyeSlash onClick={togglePasswordVisibility} />} // Use eye icon
+                    />
                 </div>
 
                 {/* Submit Button */}

@@ -5,7 +5,6 @@ import Button from '../components/Button';
 import arrow from '../assets/arrow.svg';
 import VideoService from '../api/videoService';
 
-
 const UploadVideo = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -28,6 +27,11 @@ const UploadVideo = () => {
   };
 
   const handleSubmitToFirstAPI = async () => {
+    if (!movieName.trim() || !category.trim() || !genre.trim() || !storyLine.trim() || !cast.trim()) {
+      setErrorMessage("Please fill in all fields: Movie Name, Category, Genre, Story Line, and Cast.");
+      return;
+    }
+
     if (!selectedVideo) {
       setErrorMessage("Please select a video to upload.");
       return;
@@ -73,12 +77,11 @@ const UploadVideo = () => {
   };
 
   const handleSubmitToSecondAPI = async () => {
-    if (!videoURL.trim() || !filename.trim() || !movieName.trim() || !category.trim() || !genre.trim()) {
-      setErrorMessage("Please fill in all required fields (Video URL, Filename, Movie Name, Category, and Genre).");
+    if (!filename.trim() || !videoURL.trim()) {
+      setErrorMessage("Please fill in both fields: Filename and Video URL.");
       return;
     }
 
-    // Basic URL validation
     if (!videoURL.startsWith('http://') && !videoURL.startsWith('https://')) {
       setErrorMessage("Please enter a valid URL starting with http:// or https://");
       return;
@@ -167,20 +170,20 @@ const UploadVideo = () => {
       </div>
 
       <div className="mt-3">
-        <CustomInput 
-          placeholder="Video URL" 
-          value={videoURL} 
+        <CustomInput
+          placeholder="Video URL"
+          value={videoURL}
           onChange={(e) => setVideoURL(e.target.value)}
-          required 
+          required
         />
       </div>
 
       <div className="mt-3">
-        <CustomInput 
-          placeholder="Filename" 
-          value={filename} 
+        <CustomInput
+          placeholder="Filename"
+          value={filename}
           onChange={(e) => setFilename(e.target.value)}
-          required 
+          required
         />
       </div>
 
@@ -195,6 +198,3 @@ const UploadVideo = () => {
 };
 
 export default UploadVideo;
-
-
-

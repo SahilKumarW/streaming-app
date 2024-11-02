@@ -1,14 +1,41 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import UserService from '../api/userService';
+import EditUserModal from "../Modals/EditUserModal";
 
-const UserTable = ({ users = [], onEdit, onDelete }) => {
-    const [searchTerm, setSearchTerm] = React.useState("");
+const UserTable = ({ users = [], onDelete, onUserUpdate }) => {
+    const { userId } = useParams(); // Get userId from the URL
+    const [selectedUser, setSelectedUser] = React.useState(null);
+    const [isEditing, setIsEditing] = React.useState(false);
     const [error, setError] = React.useState(null);
+    const [searchTerm, setSearchTerm] = React.useState(""); // Declare searchTerm state
+
+    useEffect(() => {
+        if (userId) {
+            // Fetch user details by ID
+            const fetchUser = async () => {
+                try {
+                    const response = await UserService.getUserById(userId);
+                    if (response.data && response.data.userResponse) {
+                        setSelectedUser(response.data.userResponse);
+                        // Do not set isEditing to true here
+                    } else {
+                        setError("User not found.");
+                    }
+                } catch (err) {
+                    console.error("Error fetching user:", err);
+                    setError("Failed to fetch user data.");
+                }
+            };
+
+            fetchUser();
+        }
+    }, [userId]); // Depend on userId
 
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
     };
 
-    // Debounce the search term to optimize performance
     const debounce = (fn, delay) => {
         let timeoutId;
         return (...args) => {
@@ -25,11 +52,26 @@ const UserTable = ({ users = [], onEdit, onDelete }) => {
 
     const filteredUsers = Array.isArray(users)
         ? users.filter((user) =>
-              user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              user.role?.toLowerCase().includes(searchTerm.toLowerCase())
-          )
+            user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.role?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
         : [];
+
+    // Use selectedUser if userId is present, otherwise use filteredUsers
+    const displayUsers = userId ? (selectedUser ? [selectedUser] : []) : filteredUsers;
+
+    const handleEdit = async (userId) => {
+        // When the user clicks "Edit", we open the modal
+        const userToEdit = users.find(user => user.id === userId);
+        setSelectedUser(userToEdit);
+        setIsEditing(true);
+    };
+
+    const handleUserUpdate = (updatedUser) => {
+        onUserUpdate(updatedUser);
+        setIsEditing(false);
+    };
 
     return (
         <div className="overflow-x-auto">
@@ -60,17 +102,17 @@ const UserTable = ({ users = [], onEdit, onDelete }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredUsers.length === 0 ? (
+                        {displayUsers.length === 0 || (userId && !selectedUser) ? (
                             <tr>
                                 <td colSpan="4" className="p-4 text-center">
-                                    No users found.{" "}
+                                    {error ? error : 'No users found. '}
                                     <button className="text-teal-500" onClick={() => window.location.href = "/addUser"}>
                                         Add User
                                     </button>
                                 </td>
                             </tr>
                         ) : (
-                            filteredUsers.map((user) => (
+                            displayUsers.map((user) => (
                                 <tr key={user.id}>
                                     <td className="p-4">{user.name}</td>
                                     <td className="p-4">{user.email}</td>
@@ -78,10 +120,7 @@ const UserTable = ({ users = [], onEdit, onDelete }) => {
                                     <td className="p-4">
                                         <button
                                             className="text-blue-500 mr-2"
-                                            onClick={() => {
-                                                console.log("Editing user:", user);
-                                                onEdit(user);
-                                            }}
+                                            onClick={() => handleEdit(user.id)} // Open the modal on button click
                                             aria-label={`Edit ${user.name}`}
                                         >
                                             Edit
@@ -104,6 +143,14 @@ const UserTable = ({ users = [], onEdit, onDelete }) => {
                     </tbody>
                 </table>
             </div>
+
+            {isEditing && selectedUser && (
+                <EditUserModal
+                    user={selectedUser}
+                    onSave={handleUserUpdate}
+                    onClose={() => setIsEditing(false)}
+                />
+            )}
         </div>
     );
 };
