@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FaCamera } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify'; // Import ToastContainer and toast
+import 'react-toastify/dist/ReactToastify.css'; // Import default styles
 import CustomInput from '../components/CustomeInput';
 import Button from '../components/Button';
 import arrow from '../assets/arrow.svg'; // Ensure the path is correct
@@ -8,15 +10,11 @@ import VideoService from '../api/videoService';
 const UploadVideo = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [videoURL, setVideoURL] = useState("");
-  const [filename, setFilename] = useState("");
-  const [movieName, setMovieName] = useState("");
+  const [name, setName] = useState(""); // Changed from movieName to name
   const [category, setCategory] = useState("");
   const [genre, setGenre] = useState("");
-  const [storyLine, setStoryLine] = useState("");
-  const [cast, setCast] = useState("");
+  const [videoURL, setVideoURL] = useState("");
+  const [filename, setFilename] = useState("");
 
   const categories = ["Movies", "TV Shows"];
 
@@ -24,18 +22,15 @@ const UploadVideo = () => {
     const file = e.target.files[0];
     if (file) {
       setSelectedVideo(file);
-      setErrorMessage(""); // Clear error when file is selected
     }
   };
 
   const handleSubmitToFirstAPI = async () => {
     // Validation
     const requiredFields = [
-      { name: "Movie Name", value: movieName },
+      { name: "Video Name", value: name },
       { name: "Category", value: category },
       { name: "Genre", value: genre },
-      { name: "Story Line", value: storyLine },
-      { name: "Cast", value: cast },
       { name: "Video", value: selectedVideo },
     ];
 
@@ -43,36 +38,29 @@ const UploadVideo = () => {
 
     if (unfilledFields.length > 0) {
       const fieldNames = unfilledFields.map(field => field.name).join(", ");
-      setErrorMessage(`Please fill in all required fields: ${fieldNames}`);
+      toast.error(`Please fill in all required fields: ${fieldNames}`); // Show error toast
       return;
     }
 
     setLoading(true);
-    setErrorMessage("");
-    setSuccessMessage("");
 
     const formData = new FormData();
-    formData.append('video', selectedVideo);
-    formData.append('movieName', movieName);
-    formData.append('category', category);
+    formData.append('video', selectedVideo); // the video file
+    formData.append('name', name); // Changed from movieName to name
+    const categoryValue = category === 'TV Shows' ? 1 : 0; // 1 for TV Shows, 0 for Movies
+    formData.append('category', categoryValue); // send as binary
     formData.append('genre', genre);
-    formData.append('storyLine', storyLine);
-    formData.append('cast', cast);
 
     try {
       const response = await VideoService.storeVideo(formData);
-      console.log("Video upload successful:", response);
-      setSuccessMessage("Video uploaded successfully!");
+      toast.success("Video uploaded successfully!"); // Show success toast
       // Clear all fields
       setSelectedVideo(null);
-      setMovieName("");
+      setName("");
       setCategory("");
       setGenre("");
-      setStoryLine("");
-      setCast("");
     } catch (error) {
-      console.error("Error uploading video:", error);
-      setErrorMessage("Upload failed. Please try again.");
+      toast.error("Upload failed. Please try again."); // Show error toast
     } finally {
       setLoading(false);
     }
@@ -80,45 +68,37 @@ const UploadVideo = () => {
 
   const handleSubmitToSecondAPI = async () => {
     if (!filename.trim() || !videoURL.trim()) {
-      setErrorMessage("Please fill in both fields: Filename and Video URL.");
+      toast.error("Please fill in both fields: Filename and Video URL."); // Show error toast
       return;
     }
 
     if (!videoURL.startsWith('http://') && !videoURL.startsWith('https://')) {
-      setErrorMessage("Please enter a valid URL starting with http:// or https://");
+      toast.error("Please enter a valid URL starting with http:// or https://"); // Show error toast
       return;
     }
 
     setLoading(true);
-    setErrorMessage("");
-    setSuccessMessage("");
 
     try {
       const urlData = {
         url: videoURL,
         filename: filename,
-        title: movieName,
-        description: storyLine,
+        title: name, // Changed from movieName to name
         category: category,
         genre: genre,
-        cast: cast,
       };
 
       console.log('Sending data to server:', urlData);
 
       const response = await VideoService.storeVideoByUrl(urlData);
-      console.log("Video URL upload successful:", response);
-      setSuccessMessage("Video URL uploaded successfully!");
+      toast.success("Video URL uploaded successfully!"); // Show success toast
       setVideoURL("");
       setFilename("");
-      setMovieName("");
+      setName(""); // Changed from movieName to name
       setCategory("");
       setGenre("");
-      setStoryLine("");
-      setCast("");
     } catch (error) {
-      console.error("Error uploading video URL:", error);
-      setErrorMessage("Upload failed. Please try again.");
+      toast.error("Upload failed. Please try again."); // Show error toast
     } finally {
       setLoading(false);
     }
@@ -148,7 +128,7 @@ const UploadVideo = () => {
 
       {/* Form Fields */}
       <div className="mt-[50px]">
-        <CustomInput placeholder="Movie Name" value={movieName} onChange={(e) => setMovieName(e.target.value)} />
+        <CustomInput placeholder="Video Name" value={name} onChange={(e) => setName(e.target.value)} /> {/* Changed from movieName to name */}
         <div className="relative w-full">
           <CustomInput
             placeholder="Category"
@@ -179,8 +159,6 @@ const UploadVideo = () => {
           />
         </div>
         <CustomInput placeholder="Genre" value={genre} onChange={(e) => setGenre(e.target.value)} />
-        <CustomInput placeholder="Story Line" value={storyLine} onChange={(e) => setStoryLine(e.target.value)} />
-        <CustomInput placeholder="Cast" value={cast} onChange={(e) => setCast(e.target.value)} />
       </div>
 
       {/* Upload Buttons */}
@@ -197,8 +175,7 @@ const UploadVideo = () => {
         <Button name={loading ? "Uploading..." : "Upload to Second API (URL)"} onClick={handleSubmitToSecondAPI} disabled={loading} />
       </div>
 
-      {successMessage && <div className="text-green-500 mt-2">{successMessage}</div>}
-      {errorMessage && <div className="text-red-500 mt-2">{errorMessage}</div>}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick draggable pauseOnHover /> {/* Add ToastContainer */}
     </div>
   );
 };
