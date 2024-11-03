@@ -13,11 +13,12 @@ const MovieCard = ({ movie, showProgress, index }) => {
   };
 
   const handleRating = async (movieId, rating) => {
+    console.log("Rating video:", { movieId, rating }); // Debugging line
     setCurrentRating((prev) => ({ ...prev, [movieId]: rating }));
     try {
       await VideoService.rateVideo({
         videoId: movieId,
-        userId: localStorage.getItem("userId"),
+        userId: localStorage.getItem("userId"), // Ensure userId is included
         rating,
       });
       console.log(`Rated video ${movieId} with ${rating} stars`);
@@ -70,12 +71,10 @@ const MovieCard = ({ movie, showProgress, index }) => {
             {[...Array(5)].map((_, starIndex) => (
               <FaStar
                 key={starIndex}
-                className={`cursor-pointer ${
-                  starIndex + 1 <=
-                  (hoverRating[movie.id] || currentRating[movie.id] || 0)
-                    ? "text-yellow-400"
-                    : "text-gray-400"
-                }`}
+                className={`cursor-pointer ${starIndex + 1 <= (hoverRating[movie.id] || currentRating[movie.id] || 0)
+                  ? "text-yellow-400"
+                  : "text-gray-400"
+                  }`}
                 onMouseEnter={() =>
                   setHoverRating((prev) => ({
                     ...prev,
@@ -88,7 +87,7 @@ const MovieCard = ({ movie, showProgress, index }) => {
                     [movie.id]: currentRating[movie.id] || 0,
                   }))
                 }
-                onClick={() => handleRating(movie.id, starIndex + 1)}
+                onClick={() => handleRating(movie.id, starIndex + 1)} // Use movie.id here
               />
             ))}
           </div>

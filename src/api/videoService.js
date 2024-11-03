@@ -30,10 +30,8 @@ const VideoService = {
     storeVideo: async (formData) => {
         const file = formData.get('video');
         if (!file || !(file instanceof File)) {
-        throw new Error("Video file is missing or invalid.");
-    }
-        // Uncomment this line if you want to enforce a file size limit
-        // if (file.size > 578) throw new Error('File size exceeds limit.');
+            throw new Error("Video file is missing or invalid.");
+        }
 
         if (!isAdmin()) {
             throw new Error("Only admins can upload videos.");
@@ -44,12 +42,7 @@ const VideoService = {
             throw new Error("User ID not found. Cannot proceed with upload.");
         }
 
-        // Construct URL with admin ID (this assumes userId is the UUID you need)
         const url = `${BASE_URL}/StoreVideo?uuid=${userId}`; // Ensure this is the correct UUID
-
-        // Debugging logs
-        console.log("Uploading video with URL:", url);
-        console.log("Form Data:", Array.from(formData.entries())); // Log form data entries
 
         try {
             const response = await post(url, formData, {
@@ -60,7 +53,6 @@ const VideoService = {
                 maxContentLength: Infinity,
                 maxBodyLength: Infinity,
             });
-            console.log("Upload response:", response.data); // Log the response data
             return response.data; // Return the response data as needed
         } catch (error) {
             console.error("Error uploading video:", error.response ? error.response.data : error.message);
@@ -93,19 +85,45 @@ const VideoService = {
     },
 
     // Rate video
-    rateVideo: async (ratingData) => {
-        const { token } = getAuthData();
-        return await post(`${BASE_URL}/rate-vedio`, ratingData, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    rateVideo: async ({ videoId, rating }) => {
+        const { token, userId } = getAuthData();
+        if (!videoId || !rating) {
+            throw new Error("Both videoId and rating are required.");
+        }
+
+        const ratingData = {
+            videoId,
+            rating,
+            userId, // Optionally include userId if needed for tracking
+        };
+
+        try {
+            const response = await post(`${BASE_URL}/rate-vedio`, ratingData, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return response.data; // Return the response data as needed
+        } catch (error) {
+            console.error("Error rating video:", error.response ? error.response.data : error.message);
+            throw error; // Re-throw the error to handle it later
+        }
     },
 
     // Get average rating for a video
     getAverageRating: async (videoId) => {
         const { token } = getAuthData();
-        return await get(`${BASE_URL}/average-rating?videoId=${videoId}`, {
+        const response = await get(`${BASE_URL}/average-rating?videoId=${videoId}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
+
+        const ratings = response.data; // Assuming this returns an array of ratings
+        return VideoService.calculateAverageRating(ratings); // Calculate and return the average rating
+    },
+
+    // Calculate average rating
+    calculateAverageRating: (ratings) => {
+        if (ratings.length === 0) return 0; // Return 0 if there are no ratings
+        const sum = ratings.reduce((total, rating) => total + rating, 0);
+        return (sum / ratings.length).toFixed(1); // Round to one decimal place
     },
 
     // Get video by ID
@@ -128,7 +146,6 @@ const VideoService = {
     showVideoList: async () => {
         const { token, userId } = getAuthData(); // Get userId from local storage
         const url = `${BASE_URL}/show-vedio-list?UserId=${userId}`; // Use userId from local storage
-        console.log("Fetching video list with URL:", url); // Debug log
         return await get(url, {
             headers: {
                 Authorization: `Bearer ${token}`, // Include Authorization header
