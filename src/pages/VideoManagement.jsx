@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom"; // Import useParams
+import { useNavigate, useParams } from "react-router-dom";
 import VideoTable from "../components/VideoTable";
 import Button from "../components/Button";
 import VideoService from '../api/videoService';
@@ -7,21 +7,33 @@ import tom from "/Assets/tom.jpg";
 
 const VideoManagement = () => {
     const navigate = useNavigate();
-    const { id } = useParams(); // Get the video ID from the URL
+    const { id } = useParams();
+    const [videos, setVideos] = useState([]); // State for video list
     const [video, setVideo] = useState(null); // State for a single video
 
     useEffect(() => {
         if (id) {
-            fetchVideoById(id); // Fetch the video if an ID is present
+            fetchVideoById(id);
+        } else {
+            fetchVideoList(); // Fetch all videos if no ID is present
         }
     }, [id]);
 
     const fetchVideoById = async (videoId) => {
         try {
             const response = await VideoService.getVideoById(videoId);
-            setVideo(response.data); // Set the fetched video data
+            setVideo(response.data);
         } catch (error) {
             console.error("Error fetching video:", error);
+        }
+    };
+
+    const fetchVideoList = async () => {
+        try {
+            const response = await VideoService.showVideoList();
+            setVideos(response.data); // Set the list of videos
+        } catch (error) {
+            console.error("Error fetching video list:", error);
         }
     };
 
@@ -64,10 +76,14 @@ const VideoManagement = () => {
 
             <div className="p-6 rounded-lg">
                 <div className="overflow-y-auto max-h-96 rounded-lg">
-                    {video ? (
-                        <VideoTable videos={[video]} /> // Pass the single video in an array
+                    {id && video ? (
+                        <VideoTable videos={[video]} /> // Display single video if ID is present
                     ) : (
-                        <p className="text-center text-white">Loading video...</p>
+                        videos.length > 0 ? (
+                            <VideoTable videos={videos} /> // Display all videos if ID is not present
+                        ) : (
+                            <p className="text-center text-white">Loading videos...</p>
+                        )
                     )}
                 </div>
             </div>

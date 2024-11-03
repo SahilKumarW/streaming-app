@@ -3,6 +3,16 @@ import { post, get, put } from './axios';
 
 const BASE_URL = '/UploadVedios';
 
+// Function to check if the user has admin access
+const isAdmin = () => {
+    const role = localStorage.getItem('role');
+    if (role !== 'Admin') {
+        console.error("Access denied: Only Admins can access this endpoint.");
+        return false;
+    }
+    return true;
+};
+
 // Function to get the token and userId
 const getAuthData = () => {
     const token = localStorage.getItem('token'); // Retrieve token from local storage
@@ -19,17 +29,43 @@ const VideoService = {
     // Store video
     storeVideo: async (formData) => {
         const file = formData.get('video');
-        if (file.size > 578) throw new Error('File size exceeds limit.');
+        if (!file || !(file instanceof File)) {
+        throw new Error("Video file is missing or invalid.");
+    }
+        // Uncomment this line if you want to enforce a file size limit
+        // if (file.size > 578) throw new Error('File size exceeds limit.');
 
-        const { token } = getAuthData(); // Retrieve token
-        return await post(`${BASE_URL}/StoreVideo`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${token}`, // Include token for authorization
-            },
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity,
-        });
+        if (!isAdmin()) {
+            throw new Error("Only admins can upload videos.");
+        }
+
+        const { token, userId } = getAuthData(); // Retrieve token and userId
+        if (!userId) {
+            throw new Error("User ID not found. Cannot proceed with upload.");
+        }
+
+        // Construct URL with admin ID (this assumes userId is the UUID you need)
+        const url = `${BASE_URL}/StoreVideo?uuid=${userId}`; // Ensure this is the correct UUID
+
+        // Debugging logs
+        console.log("Uploading video with URL:", url);
+        console.log("Form Data:", Array.from(formData.entries())); // Log form data entries
+
+        try {
+            const response = await post(url, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`, // Include token for authorization
+                },
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity,
+            });
+            console.log("Upload response:", response.data); // Log the response data
+            return response.data; // Return the response data as needed
+        } catch (error) {
+            console.error("Error uploading video:", error.response ? error.response.data : error.message);
+            throw error; // Re-throw the error to handle it later
+        }
     },
 
     // Store video by URL

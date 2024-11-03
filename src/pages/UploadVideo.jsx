@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaCamera } from 'react-icons/fa';
 import CustomInput from '../components/CustomeInput';
 import Button from '../components/Button';
-import arrow from '../assets/arrow.svg';
+import arrow from '../assets/arrow.svg'; // Ensure the path is correct
 import VideoService from '../api/videoService';
 
 const UploadVideo = () => {
@@ -18,22 +18,32 @@ const UploadVideo = () => {
   const [storyLine, setStoryLine] = useState("");
   const [cast, setCast] = useState("");
 
+  const categories = ["Movies", "TV Shows"];
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedVideo(file);
-      setErrorMessage("");
+      setErrorMessage(""); // Clear error when file is selected
     }
   };
 
   const handleSubmitToFirstAPI = async () => {
-    if (!movieName.trim() || !category.trim() || !genre.trim() || !storyLine.trim() || !cast.trim()) {
-      setErrorMessage("Please fill in all fields: Movie Name, Category, Genre, Story Line, and Cast.");
-      return;
-    }
+    // Validation
+    const requiredFields = [
+      { name: "Movie Name", value: movieName },
+      { name: "Category", value: category },
+      { name: "Genre", value: genre },
+      { name: "Story Line", value: storyLine },
+      { name: "Cast", value: cast },
+      { name: "Video", value: selectedVideo },
+    ];
 
-    if (!selectedVideo) {
-      setErrorMessage("Please select a video to upload.");
+    const unfilledFields = requiredFields.filter(field => !field.value || (field.name === "Video" && !selectedVideo));
+
+    if (unfilledFields.length > 0) {
+      const fieldNames = unfilledFields.map(field => field.name).join(", ");
+      setErrorMessage(`Please fill in all required fields: ${fieldNames}`);
       return;
     }
 
@@ -53,7 +63,7 @@ const UploadVideo = () => {
       const response = await VideoService.storeVideo(formData);
       console.log("Video upload successful:", response);
       setSuccessMessage("Video uploaded successfully!");
-      // Clear form
+      // Clear all fields
       setSelectedVideo(null);
       setMovieName("");
       setCategory("");
@@ -62,15 +72,7 @@ const UploadVideo = () => {
       setCast("");
     } catch (error) {
       console.error("Error uploading video:", error);
-      if (error.message.includes('File size exceeds server limit')) {
-        setErrorMessage(error.message + " Please try a smaller file or contact support.");
-      } else if (error.response) {
-        setErrorMessage(`Upload failed: ${error.response.status} ${error.response.statusText}. ${error.message}`);
-      } else if (error.request) {
-        setErrorMessage("Upload failed: No response received from the server. Please try again.");
-      } else {
-        setErrorMessage(`Upload failed: ${error.message}`);
-      }
+      setErrorMessage("Upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -107,7 +109,6 @@ const UploadVideo = () => {
       const response = await VideoService.storeVideoByUrl(urlData);
       console.log("Video URL upload successful:", response);
       setSuccessMessage("Video URL uploaded successfully!");
-      // Clear form
       setVideoURL("");
       setFilename("");
       setMovieName("");
@@ -117,18 +118,7 @@ const UploadVideo = () => {
       setCast("");
     } catch (error) {
       console.error("Error uploading video URL:", error);
-      if (error.response && error.response.data && error.response.data.errors) {
-        const errorMessages = Object.entries(error.response.data.errors)
-          .map(([key, value]) => `${key}: ${value.join(', ')}`)
-          .join('; ');
-        setErrorMessage(`Validation errors: ${errorMessages}`);
-      } else if (error.response) {
-        setErrorMessage(`Upload failed: ${error.response.status} ${error.response.statusText}`);
-      } else if (error.request) {
-        setErrorMessage("Upload failed: No response received from the server. Please try again.");
-      } else {
-        setErrorMessage(`Upload failed: ${error.message}`);
-      }
+      setErrorMessage("Upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -147,6 +137,7 @@ const UploadVideo = () => {
           onChange={handleFileChange}
           style={{ display: 'none' }}
           id="video-upload"
+          required // Make the file input required
         />
         <label htmlFor="video-upload" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#d3d3d3] p-3 rounded-full cursor-pointer">
           <FaCamera size={24} className="text-[#4A4A4A]" />
@@ -158,8 +149,36 @@ const UploadVideo = () => {
       {/* Form Fields */}
       <div className="mt-[50px]">
         <CustomInput placeholder="Movie Name" value={movieName} onChange={(e) => setMovieName(e.target.value)} />
-        <CustomInput placeholder="Category" value={category} onChange={(e) => setCategory(e.target.value)} icon={<img src={arrow} alt="Arrow" />} />
-        <CustomInput placeholder="Genre" value={genre} onChange={(e) => setGenre(e.target.value)} icon={<img src={arrow} alt="Arrow" />} />
+        <div className="relative w-full">
+          <CustomInput
+            placeholder="Category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            style={{ paddingRight: '30px' }} // Add padding to prevent overlap with the arrow
+          />
+          <select
+            className="absolute inset-0 opacity-0 cursor-pointer"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            style={{
+              color: 'black', // Text color of dropdown
+              backgroundColor: 'white', // Background color of dropdown
+            }}
+          >
+            {categories.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+          {/* Downward arrow icon */}
+          <img
+            src={arrow}
+            alt="Arrow"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90" // Rotate 90 degrees
+          />
+        </div>
+        <CustomInput placeholder="Genre" value={genre} onChange={(e) => setGenre(e.target.value)} />
         <CustomInput placeholder="Story Line" value={storyLine} onChange={(e) => setStoryLine(e.target.value)} />
         <CustomInput placeholder="Cast" value={cast} onChange={(e) => setCast(e.target.value)} />
       </div>
@@ -169,22 +188,9 @@ const UploadVideo = () => {
         <Button name={loading ? "Uploading..." : "Upload to First API (File)"} onClick={handleSubmitToFirstAPI} disabled={loading} />
       </div>
 
-      <div className="mt-3">
-        <CustomInput
-          placeholder="Video URL"
-          value={videoURL}
-          onChange={(e) => setVideoURL(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="mt-3">
-        <CustomInput
-          placeholder="Filename"
-          value={filename}
-          onChange={(e) => setFilename(e.target.value)}
-          required
-        />
+      <div className="mt-3 space-y-4">
+        <CustomInput placeholder="Video URL" value={videoURL} onChange={(e) => setVideoURL(e.target.value)} />
+        <CustomInput placeholder="Filename" value={filename} onChange={(e) => setFilename(e.target.value)} />
       </div>
 
       <div className="mt-3">
