@@ -1,11 +1,10 @@
 import React, { useRef } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
-import { FaStar, FaChevronLeft, FaChevronRight, FaChevronDown } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaChevronDown } from "react-icons/fa";
 import MovieCard from "./MovieCard";
 
 const ScrollableRow = ({ title, movies, loading, showProgress }) => {
   const scrollRef = useRef(null);
-
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { current } = scrollRef;

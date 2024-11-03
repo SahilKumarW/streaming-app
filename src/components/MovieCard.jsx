@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 import VideoService from "../api/videoService";
+
 
 const MovieCard = ({ movie, showProgress, index }) => {
   const [hoverRating, setHoverRating] = useState({});
   const [currentRating, setCurrentRating] = useState({});
-
   const formatTime = (minutes) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -64,30 +64,30 @@ const MovieCard = ({ movie, showProgress, index }) => {
           </h3>
           <div className="flex items-center mb-2">
             <FaStar className="text-yellow-400 mr-1" />
-            <span className="text-gray-300">{movie.rating || "N/A"}</span>
+            <span className="text-gray-300">{movie?.averageRating===undefined ? "no reviews" : movie?.averageRating+"/5"}</span>
           </div>
           <p className="text-sm text-gray-400">{movie.description}</p>
           <div className="flex items-center mt-2">
             {[...Array(5)].map((_, starIndex) => (
               <FaStar
                 key={starIndex}
-                className={`cursor-pointer ${starIndex + 1 <= (hoverRating[movie.id] || currentRating[movie.id] || 0)
+                className={`cursor-pointer ${starIndex + 1 <= (hoverRating[movie.uuid] || currentRating[movie.uuid] || 0)
                   ? "text-yellow-400"
                   : "text-gray-400"
                   }`}
                 onMouseEnter={() =>
                   setHoverRating((prev) => ({
                     ...prev,
-                    [movie.id]: starIndex + 1,
+                    [movie.uuid]: starIndex + 1,
                   }))
                 }
                 onMouseLeave={() =>
                   setHoverRating((prev) => ({
                     ...prev,
-                    [movie.id]: currentRating[movie.id] || 0,
+                    [movie.uuid]: currentRating[movie.uuid] || 0,
                   }))
                 }
-                onClick={() => handleRating(movie.id, starIndex + 1)} // Use movie.id here
+                onClick={() => handleRating(movie.uuid, starIndex + 1)} // Use movie.uuid here
               />
             ))}
           </div>
