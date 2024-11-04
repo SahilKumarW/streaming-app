@@ -1,8 +1,0 @@
-{
-    "rewrites": [
-        {
-            "source": "/api/:path*",
-            "destination": "http://streamapp2-env.eba-jqkp2xdu.us-east-2.elasticbeanstalk.com/api/:path*"
-        }
-    ]
-}
