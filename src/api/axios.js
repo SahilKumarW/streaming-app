@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://199d-110-38-244-126.ngrok-free.app/api",
+  baseURL: "http://streamapp2-env.eba-jqkp2xdu.us-east-2.elasticbeanstalk.com/api/",
   headers: {
     "Content-Type": "application/json",
     "connection": "keep-alive",
