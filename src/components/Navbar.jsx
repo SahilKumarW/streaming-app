@@ -27,9 +27,8 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`h-[100px] text-white flex items-center justify-between px-8 py-2 ${
-        isTransparentBackground ? "bg-transparent" : "bg-black"
-      }`}
+      className={`h-[100px] text-white flex items-center justify-between px-8 py-2 ${isTransparentBackground ? "bg-transparent" : "bg-black"
+        }`}
     >
       {/* Center - Links */}
       <div className="flex items-center justify-center space-x-8 mx-auto">
@@ -90,7 +89,7 @@ const Navbar = () => {
         {showSearchInput && (
           <input
             type="text"
-            placeholder="search"
+            placeholder=" Search"
             value={searchQuery}
             onChange={handleInputChange}
             className="px-2 bg-black text-white border border-white rounded-[14px]"

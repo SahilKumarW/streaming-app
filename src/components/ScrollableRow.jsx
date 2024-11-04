@@ -1,10 +1,13 @@
-import React, { useRef } from "react";
+import React, { useState, useRef } from "react";
+import VideoPlayer from "../pages/VideoPlayer";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FaChevronLeft, FaChevronRight, FaChevronDown } from "react-icons/fa";
 import MovieCard from "./MovieCard";
 
 const ScrollableRow = ({ title, movies, loading, showProgress }) => {
   const scrollRef = useRef(null);
+  const [playingUrl, setPlayingUrl] = useState(null);
+
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { current } = scrollRef;
@@ -13,17 +16,18 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
     }
   };
 
+  const playVideo = (url) => {
+    setPlayingUrl(url);
+  };
+
+  const closeVideo = () => {
+    setPlayingUrl(null);
+  };
+
   return (
     <div className="mb-8 relative">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-white text-xl md:text-2xl lg:text-3xl font-bold">
-          {title}
-        </h2>
-        {showProgress && (
-          <div className="text-white text-sm">
-            Season 1 <FaChevronDown className="inline ml-1" />
-          </div>
-        )}
+        <h2 className="text-white text-xl md:text-2xl lg:text-3xl font-bold">{title}</h2>
       </div>
 
       {loading ? (
@@ -45,7 +49,13 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
           >
             {movies.length > 0 ? (
               movies.map((movie, index) => (
-                <MovieCard key={index} showProgress={showProgress} movie={movie} index={index}/>
+                <MovieCard
+                  key={index}
+                  showProgress={showProgress}
+                  movie={movie}
+                  index={index}
+                  playVideo={playVideo} // Pass playVideo here
+                />
               ))
             ) : (
               <p className="text-lg font-semibold text-white">No data found</p>
@@ -56,6 +66,15 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
             onClick={() => scroll("right")}
           >
             <FaChevronRight />
+          </button>
+        </div>
+      )}
+
+      {playingUrl && (
+        <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center">
+          <VideoPlayer src={playingUrl} />
+          <button onClick={closeVideo} className="absolute top-4 right-4 text-white text-2xl">
+            &times;
           </button>
         </div>
       )}

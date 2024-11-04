@@ -11,15 +11,20 @@ const VideoPlayer = ({ src }) => {
       const videoElement = videoRef.current;
       if (!videoElement) return;
 
+      // Create a Video.js player
       const player = videojs(videoElement, {
         controls: true,
         fluid: true,
-        sources: [{ src, type: 'application/x-mpegURL' }]
+        sources: [{ src, type: 'video/mp4' }] // Change MIME type to 'video/mp4'
       });
 
       playerRef.current = player;
+    } else {
+      // Update the source when it changes
+      playerRef.current.src({ src, type: 'video/mp4' });
     }
 
+    // Dispose the player on unmount
     return () => {
       if (playerRef.current) {
         playerRef.current.dispose();

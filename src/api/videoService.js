@@ -129,17 +129,40 @@ const VideoService = {
     // Get video by ID
     getVideoById: async (videoId) => {
         const { token } = getAuthData();
-        return await get(`${BASE_URL}/get-vedio-by-id?id=${videoId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+            const response = await get(`${BASE_URL}/get-vedio-by-id?id=${videoId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!response.data) {
+                throw new Error("Video not found.");
+            }
+
+            return response.data; // Return the video data
+        } catch (error) {
+            console.error("Error retrieving video:", error.response ? error.response.data : error.message);
+            throw error; // Re-throw the error for further handling
+        }
     },
 
     // Search videos
     searchVideos: async (query) => {
         const { token } = getAuthData();
-        return await get(`${BASE_URL}/Search?query=${query}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+            const response = await get(`${BASE_URL}/Search?query=${encodeURIComponent(query)}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!response.data || response.data.length === 0) {
+                console.warn("No videos found for the query:", query);
+                return []; // Return an empty array if no results
+            }
+
+            return response.data; // Return the search results
+        } catch (error) {
+            console.error("Error searching videos:", error.response ? error.response.data : error.message);
+            throw error; // Re-throw the error for further handling
+        }
     },
 
     // Show video list
