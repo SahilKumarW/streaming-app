@@ -71,7 +71,8 @@ const VideoService = {
         try {
             const response = await post(`${BASE_URL}/upload-thumbnail`, formData, {
                 headers: {
-                    Authorization: `Bearer ${token}`, // Include the token for authorization
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`, // Include token for authorization
                 },
             });
 
@@ -231,13 +232,13 @@ const VideoService = {
         });
     },
 
-    // Upload thumbnail
-    uploadThumbnail: async (thumbnailData) => {
-        const { token } = getAuthData();
-        return await post(`${BASE_URL}/upload-thumbnail`, thumbnailData, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-    },
+    // // Upload thumbnail
+    // uploadThumbnail: async (thumbnailData) => {
+    //     const { token } = getAuthData();
+    //     return await post(`${BASE_URL}/upload-thumbnail`, thumbnailData, {
+    //         headers: { Authorization: `Bearer ${token}` },
+    //     });
+    // },
 
     // Get favorite videos for a user
     getFavoriteVideos: async () => {

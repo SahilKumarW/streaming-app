@@ -54,6 +54,10 @@ const UploadThumbnail = () => {
         formData.append('File', selectedThumbnail);  // Ensure selectedThumbnail is set properly
         formData.append('Description', filename);
         formData.append('VideoId', selectedVideo);
+        console.log([...formData.entries()]); // Log entries to check their contents
+        console.log("File type:", selectedThumbnail.type);
+        console.log("File size:", selectedThumbnail.size);
+
 
         try {
             const response = await VideoService.uploadThumbnail(formData);
@@ -70,7 +74,7 @@ const UploadThumbnail = () => {
             setLoading(false); // Reset loading state after operation completes
         }
     };
-    
+
     return (
         <div className="flex flex-col justify-center items-center bg-black p-4">
             <p className="text-[28px] leading-[38px] font-semibold text-white mt-8">Upload Thumbnail</p>
