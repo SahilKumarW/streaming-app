@@ -1,37 +1,54 @@
+// EditUserModal.jsx
+
 import React, { useState, useEffect } from "react";
 
 const EditUserModal = ({ user, onSave, onClose }) => {
-    const [editedUser, setEditedUser] = useState({});
+    const [editedUser, setEditedUser] = useState({
+        id: "",
+        name: "",
+        email: "",
+        phone: "",
+        dateOfBirth: "",
+        gender: 0,
+        password: "",
+        role: "",
+        userType: 0,
+        status: true
+    });
 
     useEffect(() => {
         if (user) {
-            console.log("Modal received user data:", user); // This should now log only user data
             setEditedUser(user);
         }
     }, [user]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setEditedUser((prev) => ({ ...prev, [name]: value }));
-        console.log("Updated editedUser state:", editedUser);
+        const { name, value, type, checked } = e.target;
+        setEditedUser((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? checked : value
+        }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        try {
-            console.log("Submitting updated user data:", editedUser);
-            onSave(editedUser);
-            onClose();
-        } catch (error) {
-            console.error("Error updating user:", error);
-        }
+
+        // Make sure the payload has all the necessary fields, including password.
+        const updatedUser = {
+            ...editedUser,
+            id: editedUser.id,  // Ensure ID is passed
+            password: editedUser.password || "", // If no password, send an empty string
+        };
+
+        // Call the onSave function with the updatedUser object
+        onSave(updatedUser);
+        onClose();
     };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white text-black p-6 rounded-lg shadow-lg">
+            <div className="bg-white text-black p-6 rounded-lg shadow-lg w-full max-w-md h-[80vh] overflow-y-auto">
                 <h2 className="text-lg font-semibold mb-4">Edit User</h2>
-
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -60,6 +77,55 @@ const EditUserModal = ({ user, onSave, onClose }) => {
                     </div>
 
                     <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">Phone</label>
+                        <input
+                            type="text"
+                            name="phone"
+                            value={editedUser.phone || ""}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border rounded-md"
+                            placeholder="Phone Number"
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                        <input
+                            type="date"
+                            name="dateOfBirth"
+                            value={editedUser.dateOfBirth || ""}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border rounded-md"
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">Gender</label>
+                        <select
+                            name="gender"
+                            value={editedUser.gender}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border rounded-md"
+                        >
+                            <option value={0}>Male</option>
+                            <option value={1}>Female</option>
+                            <option value={2}>Other</option>
+                        </select>
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            value={editedUser.password || ""}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border rounded-md"
+                            placeholder="Password"
+                        />
+                    </div>
+
+                    <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Role</label>
                         <input
                             type="text"
@@ -72,11 +138,35 @@ const EditUserModal = ({ user, onSave, onClose }) => {
                         />
                     </div>
 
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">User Type</label>
+                        <select
+                            name="userType"
+                            value={editedUser.userType}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border rounded-md"
+                        >
+                            <option value={0}>Regular</option>
+                            <option value={1}>Premium</option>
+                        </select>
+                    </div>
+
+                    <div className="mb-4 flex items-center">
+                        <label className="block text-sm font-medium text-gray-700 mr-2">Status</label>
+                        <input
+                            type="checkbox"
+                            name="status"
+                            checked={editedUser.status || false}
+                            onChange={handleChange}
+                            className="mt-1"
+                        />
+                    </div>
+
                     <div className="flex justify-end">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="bg-gray-300 text-black px-4 py-2 rounded"
+                            className="bg-gray-300 text-black px-4 py-2 rounded mr-2"
                         >
                             Cancel
                         </button>

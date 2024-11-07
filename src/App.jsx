@@ -29,6 +29,7 @@ import UploadVideo from "./pages/UploadVideo";
 import UserManagement from "./pages/UserManagement";
 import VideoManagement from "./pages/VideoManagement";
 import UserTable from "./components/UserTable";
+import UploadThumbnail from "./pages/UploadThumbnail";
 
 
 // Mock Navigation for the video
@@ -140,6 +141,7 @@ function App() {
         </Route>
         <Route path="/addUser" element={<AddUser />} />
         <Route path="/uploadVideo" element={<UploadVideo />} />
+        <Route path="/uploadThumbnail" element={<UploadThumbnail />} />
       </Routes>
     </Router>
   );

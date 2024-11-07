@@ -1,4 +1,5 @@
-import { get, post, patch, deleteRequest } from './axios';
+import { get, post, patch, put, deleteRequest } from './axios';
+import { toast } from 'react-toastify';
 
 const BASE_URL = '/Users';
 
@@ -61,15 +62,39 @@ const UserService = {
     updateUser: async (user) => {
         if (!isAdmin()) return Promise.reject("Access denied: Only Admins can access this endpoint.");
 
-        const { token } = getAuthData();
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('Authorization token is missing.');
+            return Promise.reject('Authorization token is missing.');
+        }
+
         try {
-            const response = await patch(`${BASE_URL}/update-user/${user.id}`, user, {
-                headers: { Authorization: `Bearer ${token}` },
+            // Perform the update
+            const response = await put(`${BASE_URL}/update-user`, user, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'accept': 'text/plain',
+                },
             });
-            return response; // Return updated user
+
+            // Show a success toast notification
+            toast.success("User updated successfully!", {
+                position: "top-right", // Positioning the toast to the top right
+                autoClose: 5000, // Duration for auto-close (in ms)
+            });
+
+            return response.data; // Return updated user data
         } catch (error) {
-            console.error("Error updating user:", error);
-            return Promise.reject("Error updating user. Please try again later.");
+            console.error('Error updating user:', error);
+
+            // Show an error toast notification
+            toast.error("Error updating user. Please try again later.", {
+                position: "top-right",
+                autoClose: 5000,
+            });
+
+            return Promise.reject('Error updating user. Please try again later.');
         }
     },
 

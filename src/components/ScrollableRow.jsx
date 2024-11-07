@@ -36,17 +36,10 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
         </div>
       ) : (
         <div className="relative">
-          <button
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10"
-            onClick={() => scroll("left")}
-          >
+          <button className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10" onClick={() => scroll("left")}>
             <FaChevronLeft />
           </button>
-          <div
-            ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide"
-            style={{ scrollBehavior: "smooth" }}
-          >
+          <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide" style={{ scrollBehavior: "smooth" }}>
             {movies.length > 0 ? (
               movies.map((movie, index) => (
                 <MovieCard
@@ -61,10 +54,7 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
               <p className="text-lg font-semibold text-white">No data found</p>
             )}
           </div>
-          <button
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10"
-            onClick={() => scroll("right")}
-          >
+          <button className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10" onClick={() => scroll("right")}>
             <FaChevronRight />
           </button>
         </div>

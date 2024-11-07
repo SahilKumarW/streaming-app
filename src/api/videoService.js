@@ -60,6 +60,28 @@ const VideoService = {
         }
     },
 
+    // Upload thumbnail
+    uploadThumbnail: async (formData) => {
+        const { token } = getAuthData(); // Get the token for authorization
+
+        if (!formData || !(formData instanceof FormData)) {
+            throw new Error("FormData is required for uploading the thumbnail.");
+        }
+
+        try {
+            const response = await post(`${BASE_URL}/upload-thumbnail`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Include the token for authorization
+                },
+            });
+
+            return response.data; // Return the response data from the API
+        } catch (error) {
+            console.error("Error uploading thumbnail:", error.response ? error.response.data : error.message);
+            throw error; // Re-throw the error to handle it later
+        }
+    },
+
     // Store video by URL
     storeVideoByUrl: async (urlData) => {
         const { token } = getAuthData();

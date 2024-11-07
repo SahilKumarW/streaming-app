@@ -44,22 +44,11 @@ const MovieCard = ({ movie, showProgress, index }) => {
     }
   };
 
-  const handlePlay = async () => {
-    console.log(`Card clicked for movie: ${movie.name}`);
-    try {
-      const videoData = await VideoService.getVideoById(movie.uuid);
-      console.log("Fetched video data:", videoData); // Log the full response
-
-      // Check if videoData and videoData.data exist, then access the URL
-      if (videoData?.data?.url) {
-        setVideoUrl(videoData.data.url); // Set video URL
-        setIsPlaying(true); // Show VideoPlayer component with the video URL
-        console.log("Video URL set for playback:", videoData.data.url);
-      } else {
-        console.log("No video URL found for this movie.");
-      }
-    } catch (error) {
-      console.error("Error fetching video data:", error);
+  const handlePlay = () => {
+    if (movie.url) {
+      playVideo(movie.url); // Directly use movie.url to play
+    } else {
+      console.log("No video URL found for this movie.");
     }
   };
 
