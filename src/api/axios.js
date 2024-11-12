@@ -70,4 +70,16 @@ export const put = (endpoint, data, config = {}) => apiRequest('put', endpoint, 
 export const patch = (endpoint, data, config = {}) => apiRequest('patch', endpoint, data, config);
 export const deleteRequest = (endpoint, config = {}) => apiRequest('delete', endpoint, null, config);
 
+// Function to get the token and userId
+export const getAuthData = () => {
+  const token = localStorage.getItem('token'); // Retrieve token from local storage
+  const userId = localStorage.getItem('userId'); // Retrieve userId from local storage
+
+  if (!userId) {
+    console.error("User ID not found. Please log in again.");
+  }
+
+  return { token, userId }; // Return both token and userId
+};
+
 export default instance;

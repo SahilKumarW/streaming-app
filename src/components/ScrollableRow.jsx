@@ -1,27 +1,29 @@
 import React, { useState, useRef } from "react";
-import VideoPlayer from "../pages/VideoPlayer";
 import ClipLoader from "react-spinners/ClipLoader";
-import { FaChevronLeft, FaChevronRight, FaChevronDown } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import MovieCard from "./MovieCard";
+import VideoService from "../api/videoService";
 
-const ScrollableRow = ({ title, movies, loading, showProgress }) => {
+const ScrollableRow = ({ title, movies, loading }) => {
   const scrollRef = useRef(null);
   const [playingUrl, setPlayingUrl] = useState(null);
+
+  const playVideo = (url) => {
+    setPlayingUrl(url); // Set video URL to play
+    document.body.style.overflow = "hidden"; // Prevent scrolling on the background
+  };
+
+  const closeVideo = () => {
+    setPlayingUrl(null); // Close video modal
+    document.body.style.overflow = "auto"; // Enable scrolling on the background
+  };
 
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { current } = scrollRef;
       const scrollAmount = direction === "left" ? -current.offsetWidth : current.offsetWidth;
-      current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      current.scrollLeft += scrollAmount;
     }
-  };
-
-  const playVideo = (url) => {
-    setPlayingUrl(url);
-  };
-
-  const closeVideo = () => {
-    setPlayingUrl(null);
   };
 
   return (
@@ -36,36 +38,37 @@ const ScrollableRow = ({ title, movies, loading, showProgress }) => {
         </div>
       ) : (
         <div className="relative">
-          <button className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10" onClick={() => scroll("left")}>
-            <FaChevronLeft />
-          </button>
-          <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide" style={{ scrollBehavior: "smooth" }}>
-            {movies.length > 0 ? (
-              movies.map((movie, index) => (
-                <MovieCard
-                  key={index}
-                  showProgress={showProgress}
-                  movie={movie}
-                  index={index}
-                  playVideo={playVideo} // Pass playVideo here
-                />
-              ))
-            ) : (
-              <p className="text-lg font-semibold text-white">No data found</p>
-            )}
+          <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide">
+            {movies.map((movie, index) => (
+              <MovieCard
+                key={movie.uuid}
+                movie={movie}
+                index={index}
+                playVideo={playVideo} // Pass the playVideo function to MovieCard
+              />
+            ))}
           </div>
-          <button className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10" onClick={() => scroll("right")}>
-            <FaChevronRight />
-          </button>
+
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 cursor-pointer z-10" onClick={() => scroll("left")}>
+            <FaChevronLeft className="text-white text-4xl" />
+          </div>
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 cursor-pointer z-10" onClick={() => scroll("right")}>
+            <FaChevronRight className="text-white text-4xl" />
+          </div>
         </div>
       )}
 
       {playingUrl && (
-        <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center">
-          <VideoPlayer src={playingUrl} />
-          <button onClick={closeVideo} className="absolute top-4 right-4 text-white text-2xl">
-            &times;
-          </button>
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="w-full h-[90vh] max-w-5xl flex justify-center items-center relative overflow-hidden">
+            <video className="w-full h-full object-contain" controls autoPlay>
+              <source src={playingUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <button onClick={closeVideo} className="absolute top-4 right-4 text-white text-4xl">
+              &times;
+            </button>
+          </div>
         </div>
       )}
     </div>

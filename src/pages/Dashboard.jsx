@@ -1,11 +1,13 @@
 import React from "react";
-import { NavLink, Outlet } from "react-router-dom"; // Use NavLink for active links
+import { NavLink, Outlet, useLocation } from "react-router-dom"; // Import useLocation
 import dashboardIcon from "../assets/dashboardIcon.svg";
 import DashboardPIC from "../assets/Dashboard.svg";
 import Borrower from "../assets/Borrower.svg";
 import Application from "../assets/Application.svg";
 
 const Dashboard = () => {
+  const location = useLocation(); // Get the current route location
+
   return (
     <div className="dashboard_section flex">
       <div className="left_section border-r-[1px] border-[#097969] w-[250px]">
@@ -47,7 +49,7 @@ const Dashboard = () => {
                 <span className="pl-2">User Management</span>
               </NavLink>
             </li>
-            <li className="flex justify-center items-center w-[216px] h-[56px] rounded-lg hover:bg-gray-300 ">
+            <li className="flex justify-center items-center w-[216px] h-[56px] rounded-lg hover:bg-gray-300">
               <NavLink
                 to="/dashboard/video-management"
                 className={({ isActive }) =>
@@ -64,7 +66,30 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="right_section w-[calc(100%-250px)]">
+      <div className="right_section w-[calc(100%-250px)] flex justify-center items-center">
+        {/* Render buttons only on the main dashboard page */}
+        {location.pathname === "/dashboard" && (
+          <div className="flex flex-col space-y-4 items-center">
+            <button
+              className="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition"
+              onClick={() => window.location.href = "/dashboard/user-management"}
+            >
+              Manage Users
+            </button>
+            <button
+              className="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition"
+              onClick={() => window.location.href = "/dashboard/video-management"}
+            >
+              Manage Videos
+            </button>
+            <button
+              className="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition"
+              onClick={() => window.location.href = "/dashboard/subscription-management"}
+            >
+              Subscription Management
+            </button>
+          </div>
+        )}
         <Outlet />
       </div>
     </div>

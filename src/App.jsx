@@ -30,7 +30,8 @@ import UserManagement from "./pages/UserManagement";
 import VideoManagement from "./pages/VideoManagement";
 import UserTable from "./components/UserTable";
 import UploadThumbnail from "./pages/UploadThumbnail";
-
+import CreateCustomer from "./pages/CreateCustomer";
+import PrivateRoute from "./components/PrivateRoute";
 
 // Mock Navigation for the video
 function MockLogin() {
@@ -129,19 +130,20 @@ function App() {
         <Route path="/videos/:videoId" element={<VideoPlayer />} />
 
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-
         {/* Dashboard route with nested child routes */}
         <Route path="/dashboard" element={<Dashboard />}>
           <Route path="user-management" element={<UserManagement />}>
             <Route path=":userId" element={<UserTable />} />
           </Route>
           <Route path="video-management" element={<VideoManagement />}>
-            <Route path=":id" component={VideoManagement} />
+            <Route path=":id" element={<VideoManagement />} />
           </Route>
         </Route>
-        <Route path="/addUser" element={<AddUser />} />
-        <Route path="/uploadVideo" element={<UploadVideo />} />
-        <Route path="/uploadThumbnail" element={<UploadThumbnail />} />
+
+        <Route path="/dashboard/addUser" element={<AddUser />} />
+        <Route path="/dashboard/uploadVideo" element={<UploadVideo />} />
+        <Route path="/dashboard/uploadThumbnail" element={<UploadThumbnail />} />
+        <Route path="/dashboard/create-customer" element={<CreateCustomer />} />      
       </Routes>
     </Router>
   );

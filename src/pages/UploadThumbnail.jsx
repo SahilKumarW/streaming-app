@@ -5,21 +5,22 @@ import 'react-toastify/dist/ReactToastify.css';
 import CustomInput from '../components/CustomeInput';
 import Button from '../components/Button';
 import VideoService from '../api/videoService';
+import { getAuthData } from '../api/axios';
 
 const UploadThumbnail = () => {
     const [selectedThumbnail, setSelectedThumbnail] = useState(null);
     const [filename, setFilename] = useState("");
     const [loading, setLoading] = useState(false);
     const [videoList, setVideoList] = useState([]);
-    const [selectedVideo, setSelectedVideo] = useState(null); // Store selected video UUID
-    const [loadingVideos, setLoadingVideos] = useState(true); // Loading state for video list
+    const [selectedVideo, setSelectedVideo] = useState(null);
+    const [loadingVideos, setLoadingVideos] = useState(true);
 
     // Fetch video list on component mount
     useEffect(() => {
         const fetchVideoList = async () => {
             try {
-                const response = await VideoService.showVideoList(); // Assuming this is your API for video list
-                setVideoList(response.data); // Assuming response.data contains the list of videos
+                const response = await VideoService.showVideoList();
+                setVideoList(response.data);
             } catch (error) {
                 toast.error("Failed to fetch video list.");
             } finally {
@@ -34,44 +35,57 @@ const UploadThumbnail = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            console.log("Selected file:", file);  // Log the file to check if it's being selected
-            setSelectedThumbnail(file); // Set the selected file
+            setSelectedThumbnail(file);
         }
     };
 
-    // Handle the form submission (uploading the thumbnail)
+    // Handle the form submission (uploading or updating the thumbnail)
     const handleSubmitToAPI = async () => {
-        // Validate form inputs
         if (!filename.trim() || !selectedThumbnail || !selectedVideo) {
             toast.error("Please fill in all fields: select a video, filename, and upload a thumbnail.");
             return;
         }
 
-        setLoading(true); // Set loading state to true during upload
+        setLoading(true);
 
         const formData = new FormData();
-        console.log("Appending file to FormData:", selectedThumbnail);  // Log to check if the file is available
-        formData.append('File', selectedThumbnail);  // Ensure selectedThumbnail is set properly
+        formData.append('File', selectedThumbnail);
         formData.append('Description', filename);
         formData.append('VideoId', selectedVideo);
-        console.log([...formData.entries()]); // Log entries to check their contents
-        console.log("File type:", selectedThumbnail.type);
-        console.log("File size:", selectedThumbnail.size);
 
+        // Assuming you have a function to get the auth token
+        const { token } = getAuthData();
+
+        // Check if the video already has a thumbnail
+        const selectedVideoData = videoList.find((video) => video.uuid === selectedVideo);
+        const thumbnailExists = selectedVideoData && selectedVideoData.thumbnailUrl;
 
         try {
-            const response = await VideoService.uploadThumbnail(formData);
-            if (response.status === 200) {
-                toast.success("Thumbnail uploaded successfully!");
-                // Clear form fields after successful upload
-                setFilename("");
-                setSelectedThumbnail(null);
-                setSelectedVideo(null);
+            if (thumbnailExists) {
+                // If thumbnail exists, make PUT request to update it
+                const response = await VideoService.updateThumbnail(formData, token);
+                if (response && response.data && response.data.thumbnailUrl) {
+                    toast.success("Thumbnail updated successfully!");
+                } else {
+                    toast.error("Failed to update thumbnail.");
+                }
+            } else {
+                // Otherwise, make POST request to upload a new thumbnail
+                const response = await VideoService.uploadThumbnail(formData, token);
+                if (response && response.data && response.data.thumbnailUrl) {
+                    toast.success("Thumbnail uploaded successfully!");
+                } else {
+                    toast.error("Failed to upload thumbnail.");
+                }
             }
         } catch (error) {
-            toast.error("Upload failed. Please try again.");
+            toast.error("Error occurred while uploading the thumbnail.");
         } finally {
-            setLoading(false); // Reset loading state after operation completes
+            setLoading(false);
+            // Clear form fields after successful upload
+            setFilename("");
+            setSelectedThumbnail(null);
+            setSelectedVideo(null);
         }
     };
 

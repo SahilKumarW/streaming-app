@@ -1,13 +1,34 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";  // Import useNavigate instead of useHistory
+import VideoService from '../api/videoService';  // Assuming this contains the getVideoById function
 
 const VideoTable = ({ videos = [], onEdit, onDelete }) => {
+    const { videoId } = useParams(); // Get the videoId from URL
     const [searchTerm, setSearchTerm] = React.useState("");
     const [error, setError] = React.useState(null);
+    const [selectedVideo, setSelectedVideo] = useState(null);  // Store the selected video
+    const navigate = useNavigate();  // useNavigate for navigation instead of useHistory
 
     // Log the videos list when the component mounts
     useEffect(() => {
         console.log("Videos List:", videos);
     }, [videos]);
+
+    useEffect(() => {
+        if (videoId) {
+            // Fetch video details if videoId is in the URL
+            const fetchVideo = async () => {
+                try {
+                    const video = await VideoService.getVideoById(videoId);
+                    setSelectedVideo(video);  // Set selected video from the API response
+                } catch (err) {
+                    setError("Video not found.");
+                }
+            };
+
+            fetchVideo();
+        }
+    }, [videoId]);
 
     const handleSearch = (event) => {
         debouncedSearch(event.target.value);
@@ -74,46 +95,63 @@ const VideoTable = ({ videos = [], onEdit, onDelete }) => {
                             <tr>
                                 <td colSpan="4" className="p-4 text-center">
                                     No videos found.{" "}
-                                    <button className="text-teal-500" onClick={() => window.location.href = "/uploadVideo"}>
+                                    <button className="text-teal-500" onClick={() => navigate("/uploadVideo")}>
                                         Add Video
                                     </button>
                                 </td>
                             </tr>
                         ) : (
-                            filteredVideos.map((video) => (
-                                <tr key={video.uuid}>
-                                    <td className="p-4">{video.name}</td>
-                                    <td className="p-4">{video.category}</td>
-                                    <td className="p-4">{video.genre}</td>
-                                    <td className="p-4">
-                                        <button
-                                            className="text-blue-500 mr-2"
-                                            onClick={() => {
-                                                console.log("Editing video:", video);
-                                                onEdit(video);
-                                            }}
-                                            aria-label={`Edit ${video.name}`}
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            className="text-red-500"
-                                            onClick={() => {
-                                                if (window.confirm(`Are you sure you want to delete ${video.name}?`)) {
-                                                    onDelete(video.uuid);
-                                                }
-                                            }}
-                                            aria-label={`Delete ${video.name}`}
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
+                            filteredVideos.map((video) => {
+                                // If the videoId matches the current video, mark it as selected and show detailed row
+                                const isSelected = video.uuid === videoId;
+
+                                return (
+                                    <tr key={video.uuid} className={isSelected ? "bg-gray-800" : ""}>
+                                        <td className="p-4">
+                                            <a href={`/video/${video.uuid}`} className="text-blue-500">
+                                                {video.name}
+                                            </a>
+                                        </td>
+                                        <td className="p-4">{video.category}</td>
+                                        <td className="p-4">{video.genre}</td>
+                                        <td className="p-4">
+                                            <button
+                                                className="text-blue-500 mr-2"
+                                                onClick={() => {
+                                                    console.log("Editing video:", video);
+                                                    onEdit(video);
+                                                }}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="text-red-500"
+                                                onClick={() => {
+                                                    if (window.confirm(`Are you sure you want to delete ${video.name}?`)) {
+                                                        onDelete(video.uuid);
+                                                    }
+                                                }}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
             </div>
+
+            {/* Render the selected video details if a video is selected */}
+            {selectedVideo && (
+                <div className="mt-4 bg-gray-800 p-4 rounded-lg">
+                    <h3 className="text-white text-xl font-semibold">Selected Video</h3>
+                    <p className="text-white">Name: {selectedVideo.name}</p>
+                    <p className="text-white">Category: {selectedVideo.category}</p>
+                    <p className="text-white">Genre: {selectedVideo.genre}</p>
+                </div>
+            )}
         </div>
     );
 };

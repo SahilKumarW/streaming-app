@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
 import { FaCamera } from 'react-icons/fa';
-import { ToastContainer, toast } from 'react-toastify'; // Import ToastContainer and toast
-import 'react-toastify/dist/ReactToastify.css'; // Import default styles
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import CustomInput from '../components/CustomeInput';
 import Button from '../components/Button';
-import arrow from '../assets/arrow.svg'; // Ensure the path is correct
+import arrow from '../assets/arrow.svg';
 import VideoService from '../api/videoService';
 
 const UploadVideo = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState(""); // Changed from movieName to name
+  const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [genre, setGenre] = useState("");
   const [videoURL, setVideoURL] = useState("");
   const [filename, setFilename] = useState("");
 
   const categories = ["Movies", "TV Shows"];
+  const genreOptions = [
+    "Action", "Adventure", "Horror", "Historical",
+    "Thriller", "Romance", "Supernatural", "Fantasy",
+    "SciFi", "Documentary"
+  ];
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -38,29 +43,28 @@ const UploadVideo = () => {
 
     if (unfilledFields.length > 0) {
       const fieldNames = unfilledFields.map(field => field.name).join(", ");
-      toast.error(`Please fill in all required fields: ${fieldNames}`); // Show error toast
+      toast.error(`Please fill in all required fields: ${fieldNames}`);
       return;
     }
 
     setLoading(true);
 
     const formData = new FormData();
-    formData.append('video', selectedVideo); // the video file
-    formData.append('name', name); // Changed from movieName to name
-    const categoryValue = category === 'TV Shows' ? 1 : 0; // 1 for TV Shows, 0 for Movies
-    formData.append('category', categoryValue); // send as binary
+    formData.append('video', selectedVideo);
+    formData.append('name', name);
+    const categoryValue = category === 'TV Shows' ? 1 : 0;
+    formData.append('category', categoryValue);
     formData.append('genre', genre);
 
     try {
       const response = await VideoService.storeVideo(formData);
-      toast.success("Video uploaded successfully!"); // Show success toast
-      // Clear all fields
+      toast.success("Video uploaded successfully!");
       setSelectedVideo(null);
       setName("");
       setCategory("");
       setGenre("");
     } catch (error) {
-      toast.error("Upload failed. Please try again."); // Show error toast
+      toast.error("Upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -68,12 +72,12 @@ const UploadVideo = () => {
 
   const handleSubmitToSecondAPI = async () => {
     if (!filename.trim() || !videoURL.trim()) {
-      toast.error("Please fill in both fields: Filename and Video URL."); // Show error toast
+      toast.error("Please fill in both fields: Filename and Video URL.");
       return;
     }
 
     if (!videoURL.startsWith('http://') && !videoURL.startsWith('https://')) {
-      toast.error("Please enter a valid URL starting with http:// or https://"); // Show error toast
+      toast.error("Please enter a valid URL starting with http:// or https://");
       return;
     }
 
@@ -83,7 +87,7 @@ const UploadVideo = () => {
       const urlData = {
         url: videoURL,
         filename: filename,
-        title: name, // Changed from movieName to name
+        title: name,
         category: category,
         genre: genre,
       };
@@ -91,14 +95,14 @@ const UploadVideo = () => {
       console.log('Sending data to server:', urlData);
 
       const response = await VideoService.storeVideoByUrl(urlData);
-      toast.success("Video URL uploaded successfully!"); // Show success toast
+      toast.success("Video URL uploaded successfully!");
       setVideoURL("");
       setFilename("");
-      setName(""); // Changed from movieName to name
+      setName("");
       setCategory("");
       setGenre("");
     } catch (error) {
-      toast.error("Upload failed. Please try again."); // Show error toast
+      toast.error("Upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -117,7 +121,7 @@ const UploadVideo = () => {
           onChange={handleFileChange}
           style={{ display: 'none' }}
           id="video-upload"
-          required // Make the file input required
+          required
         />
         <label htmlFor="video-upload" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#d3d3d3] p-3 rounded-full cursor-pointer">
           <FaCamera size={24} className="text-[#4A4A4A]" />
@@ -128,21 +132,21 @@ const UploadVideo = () => {
 
       {/* Form Fields */}
       <div className="mt-[50px]">
-        <CustomInput placeholder="Video Name" value={name} onChange={(e) => setName(e.target.value)} /> {/* Changed from movieName to name */}
+        <CustomInput placeholder="Video Name" value={name} onChange={(e) => setName(e.target.value)} />
         <div className="relative w-full">
           <CustomInput
             placeholder="Category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            style={{ paddingRight: '30px' }} // Add padding to prevent overlap with the arrow
+            style={{ paddingRight: '30px' }}
           />
           <select
             className="absolute inset-0 opacity-0 cursor-pointer"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{
-              color: 'black', // Text color of dropdown
-              backgroundColor: 'white', // Background color of dropdown
+              color: 'black',
+              backgroundColor: 'white',
             }}
           >
             {categories.map((option) => (
@@ -151,14 +155,43 @@ const UploadVideo = () => {
               </option>
             ))}
           </select>
-          {/* Downward arrow icon */}
           <img
             src={arrow}
             alt="Arrow"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90" // Rotate 90 degrees
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90"
           />
         </div>
-        <CustomInput placeholder="Genre" value={genre} onChange={(e) => setGenre(e.target.value)} />
+
+        {/* Genre Dropdown */}
+        <div className="relative w-full mt-4">
+          <CustomInput
+            placeholder="Genre"
+            value={genreOptions[genre]} // Display genre name based on index
+            onChange={(e) => setGenre(e.target.value)}
+            style={{ paddingRight: '30px' }} // Same styling as category dropdown
+          />
+          <select
+            className="absolute inset-0 opacity-0 cursor-pointer"
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+            style={{
+              color: 'black',
+              backgroundColor: 'white',
+            }}
+          >
+            <option value="" disabled>Select Genre</option>
+            {genreOptions.map((genreOption, index) => (
+              <option key={index} value={index}>
+                {genreOption}
+              </option>
+            ))}
+          </select>
+          <img
+            src={arrow}
+            alt="Arrow"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90"
+          />
+        </div>
       </div>
 
       {/* Upload Buttons */}
@@ -175,7 +208,7 @@ const UploadVideo = () => {
         <Button name={loading ? "Uploading..." : "Upload to Second API (URL)"} onClick={handleSubmitToSecondAPI} disabled={loading} />
       </div>
 
-      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick draggable pauseOnHover /> {/* Add ToastContainer */}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick draggable pauseOnHover />
     </div>
   );
 };

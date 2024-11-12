@@ -1,5 +1,5 @@
 import instance from './axios'; // Ensure this is configured correctly
-import { post, get, put } from './axios';
+import { post, get, put, getAuthData } from './axios';
 
 const BASE_URL = '/UploadVedios';
 
@@ -11,18 +11,6 @@ const isAdmin = () => {
         return false;
     }
     return true;
-};
-
-// Function to get the token and userId
-const getAuthData = () => {
-    const token = localStorage.getItem('token'); // Retrieve token from local storage
-    const userId = localStorage.getItem('userId'); // Retrieve userId from local storage
-
-    if (!userId) {
-        console.error("User ID not found. Please log in again.");
-    }
-
-    return { token, userId }; // Return both token and userId
 };
 
 const VideoService = {
@@ -60,10 +48,96 @@ const VideoService = {
         }
     },
 
-    // Upload thumbnail
-    uploadThumbnail: async (formData) => {
-        const { token } = getAuthData(); // Get the token for authorization
+    // API call to add video to watch history
+    watchHistoryAdd: async ({ userId, videoId, vedioName, watchedOn, watchDuration, isCompleted }) => {
+        try {
+            const response = await post('/watch-history-add', {
+                userId,
+                videoId,
+                vedioName,
+                watchedOn,
+                watchDuration,
+                isCompleted,
+            }, getAuthData());
+            console.log("Sending watch history data:", { userId, videoId, vedioName, watchedOn, watchDuration, isCompleted });
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+                console.error("Error response from server:", error.response.data); // Logs the server response error details
+                console.error("Error status:", error.response.status); // Logs the HTTP status code
+            } else {
+                console.error("Error message:", error.message); // Logs the error message if no response is received
+            }
+            throw error; // Re-throw the error to handle it later
+        }
+    },
 
+    // API call to update watch history
+    watchHistoryUpdate: async ({ userId, videoId, vedioName, watchedOn, watchDuration, isCompleted }) => {
+        try {
+            const response = await put('/watch-history-update', {
+                userId,
+                videoId,
+                vedioName,
+                watchedOn,
+                watchDuration,
+                isCompleted,
+            }, getAuthData());
+            return response.data;
+        } catch (error) {
+            console.error('Error updating watch history:', error);
+            throw error;
+        }
+    },
+
+    // Get user watch history
+    getUserWatchHistory: async () => {
+        const { token, userId } = getAuthData(); // Retrieve token and userId
+        if (!token || !userId) {
+            throw new Error('User is not authenticated');
+        }
+
+        try {
+            const response = await axios.get(`${BASE_URL}/get-user-watch-history?userId=${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'accept': 'text/plain', // Set the accept header as per the curl request
+                },
+            });
+
+            const watchHistory = response.data.data || []; // Get the 'data' array from the response
+
+            // Format and return the watch history in a more structured way
+            const formattedHistory = watchHistory.map(item => ({
+                id: item.id,
+                videoId: item.videoId,
+                videoName: item.videoName,
+                watchedOn: item.watchedOn,
+                watchDuration: item.watchDuration,
+                isCompleted: item.isCompleted,
+                videoDetails: {
+                    name: item.videoDetails.name,
+                    genre: item.videoDetails.genre,
+                    category: item.videoDetails.category,
+                    url: item.videoDetails.url,
+                    thumbnailUrl: item.videoDetails.thumbnail.thumbnailUrl,
+                },
+                userDetails: {
+                    userId: item.userDetails.id,
+                    userName: item.userDetails.name,
+                    userEmail: item.userDetails.email,
+                },
+            }));
+
+            return formattedHistory; // Return the formatted history
+        } catch (error) {
+            console.error("Error fetching user watch history:", error.response?.data || error.message);
+            throw error; // Re-throw the error to handle it later
+        }
+    },
+
+    // Upload thumbnail to the server
+    uploadThumbnail: async (formData, token) => {
         if (!formData || !(formData instanceof FormData)) {
             throw new Error("FormData is required for uploading the thumbnail.");
         }
@@ -76,9 +150,29 @@ const VideoService = {
                 },
             });
 
-            return response.data; // Return the response data from the API
+            return response; // Return the response data from the API
         } catch (error) {
             console.error("Error uploading thumbnail:", error.response ? error.response.data : error.message);
+            throw error; // Re-throw the error to handle it later
+        }
+    },
+
+    updateThumbnail: async (formData, token) => {
+        if (!formData || !(formData instanceof FormData)) {
+            throw new Error("FormData is required for updating the thumbnail.");
+        }
+
+        try {
+            const response = await put(`${BASE_URL}/update-thumbnail`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`, // Include token for authorization
+                },
+            });
+
+            return response; // Return the response data from the API
+        } catch (error) {
+            console.error("Error updating thumbnail:", error.response ? error.response.data : error.message);
             throw error; // Re-throw the error to handle it later
         }
     },
@@ -91,21 +185,6 @@ const VideoService = {
         });
     },
 
-    // Add to watch history
-    watchHistoryAdd: async (watchData) => {
-        const { token, userId } = getAuthData();
-        return await post(`${BASE_URL}/watch-history-add`, { ...watchData, userId }, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-    },
-
-    // Update watch history
-    watchHistoryUpdate: async (watchData) => {
-        const { token } = getAuthData();
-        return await post(`${BASE_URL}/watch-history-update`, watchData, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-    },
 
     // Rate video
     rateVideo: async ({ videoId, rating }) => {
@@ -134,17 +213,33 @@ const VideoService = {
     // Get average rating for a video
     getAverageRating: async (videoId) => {
         const { token } = getAuthData();
-        const response = await get(`${BASE_URL}/average-rating?videoId=${videoId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+            const response = await get(`${BASE_URL}/average-rating?VedioId=${videoId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-        const ratings = response.data; // Assuming this returns an array of ratings
-        return VideoService.calculateAverageRating(ratings); // Calculate and return the average rating
+            if (response.data === null) {
+                console.log(`No ratings found for movie ${videoId}`);
+                return 0; // Return 0 if no ratings are found
+            }
+
+            return response.data; // Return the average rating if available
+        } catch (error) {
+            console.error(`Error fetching rating for movie ${videoId}:`, error);
+            return 0; // Return 0 on error
+        }
     },
 
     // Calculate average rating
     calculateAverageRating: (ratings) => {
-        if (ratings.length === 0) return 0; // Return 0 if there are no ratings
+        if (ratings === null) {
+            return 0; // No ratings found, return 0
+        }
+
+        if (Array.isArray(ratings) && ratings.length === 0) {
+            return 0; // If ratings array is empty, return 0
+        }
+
         const sum = ratings.reduce((total, rating) => total + rating, 0);
         return (sum / ratings.length).toFixed(1); // Round to one decimal place
     },
@@ -161,10 +256,10 @@ const VideoService = {
                 throw new Error("Video not found.");
             }
 
-            return response.data; // Return the video data
+            return response.data;
         } catch (error) {
             console.error("Error retrieving video:", error.response ? error.response.data : error.message);
-            throw error; // Re-throw the error for further handling
+            throw error;
         }
     },
 
