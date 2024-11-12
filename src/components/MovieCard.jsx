@@ -3,17 +3,55 @@ import { FaStar, FaHeart } from "react-icons/fa";
 import { toast } from "react-toastify";
 import VideoService from "../api/videoService";
 
-const MovieCard = ({ movie, index, playVideo }) => {
+const MovieCard = ({ movie, index, playVideo, closeModal }) => {
   const [hoverRating, setHoverRating] = useState(0);
   const [currentRating, setCurrentRating] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [watchDuration, setWatchDuration] = useState(0);
 
   const handlePlay = async () => {
-    // Call the playVideo function passed from ScrollableRow
     if (movie.url) {
-      playVideo(movie.url); // Trigger modal play from ScrollableRow
+      try {
+        // Add to watch history when the video starts playing
+        await VideoService.watchHistoryAdd({
+          userWatchHistoryRequestDTO: {
+            id: generateUniqueId(), // Implement or import a unique ID generator
+            userId: localStorage.getItem("userId"),
+            videoId: movie.uuid,
+            vedioName: movie.name,
+            watchedOn: new Date().toISOString(),
+            watchDuration: 0, // Initial watch duration
+            isCompleted: false,
+          },
+        });
+        playVideo(movie.url); // Trigger modal play
+      } catch (error) {
+        console.error("Error adding to watch history:", error);
+        toast.error("Failed to add to watch history. Please try again.");
+      }
     }
+  };
+
+  const handleCloseModal = async () => {
+    if (watchDuration < movie.totalDuration) {
+      try {
+        // Update watch history if video was partially watched
+        await VideoService.watchHistoryUpdate({
+          userWatchHistoryRequestDTO: {
+            userId: localStorage.getItem("userId"),
+            videoId: movie.uuid,
+            watchDuration,
+            isCompleted: false,
+          },
+        });
+        toast.info("Watch history updated.");
+      } catch (error) {
+        console.error("Error updating watch history:", error);
+        toast.error("Failed to update watch history.");
+      }
+    }
+    closeModal(); // Close modal after handling
   };
 
   const handleFavorite = async () => {
@@ -89,6 +127,9 @@ const MovieCard = ({ movie, index, playVideo }) => {
       setCurrentRating(Number(userRating));
     }
   }, [movie.uuid]);
+
+  // Mock function to generate unique ID (use a library like uuid if needed)
+  const generateUniqueId = () => `id-${Date.now()}`;
 
   return (
     <div
