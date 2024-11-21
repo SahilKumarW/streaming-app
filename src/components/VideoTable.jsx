@@ -95,7 +95,7 @@ const VideoTable = ({ videos = [], onEdit, onDelete }) => {
                             <tr>
                                 <td colSpan="4" className="p-4 text-center">
                                     No videos found.{" "}
-                                    <button className="text-teal-500" onClick={() => navigate("/uploadVideo")}>
+                                    <button className="text-teal-500" onClick={() => navigate("/dashboard/uploadVideo")}>
                                         Add Video
                                     </button>
                                 </td>

@@ -2,57 +2,45 @@ import React, { useState, useEffect } from "react";
 import { FaStar, FaHeart } from "react-icons/fa";
 import { toast } from "react-toastify";
 import VideoService from "../api/videoService";
+import VideoPlayer from "../pages/VideoPlayer";
 
-const MovieCard = ({ movie, index, playVideo, closeModal }) => {
+const MovieCard = ({ movie, section }) => {
   const [hoverRating, setHoverRating] = useState(0);
   const [currentRating, setCurrentRating] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [watchDuration, setWatchDuration] = useState(0);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
 
-  const handlePlay = async () => {
+  const handlePlay = () => {
     if (movie.url) {
-      try {
-        // Add to watch history when the video starts playing
-        await VideoService.watchHistoryAdd({
-          userWatchHistoryRequestDTO: {
-            id: generateUniqueId(), // Implement or import a unique ID generator
-            userId: localStorage.getItem("userId"),
-            videoId: movie.uuid,
-            vedioName: movie.name,
-            watchedOn: new Date().toISOString(),
-            watchDuration: 0, // Initial watch duration
-            isCompleted: false,
-          },
-        });
-        playVideo(movie.url); // Trigger modal play
-      } catch (error) {
-        console.error("Error adding to watch history:", error);
-        toast.error("Failed to add to watch history. Please try again.");
-      }
+      setVideoUrl(movie.url);
+      setIsVideoModalOpen(true);
+    } else {
+      toast.error("No video URL found for this movie.");
     }
   };
 
-  const handleCloseModal = async () => {
-    if (watchDuration < movie.totalDuration) {
-      try {
-        // Update watch history if video was partially watched
-        await VideoService.watchHistoryUpdate({
-          userWatchHistoryRequestDTO: {
-            userId: localStorage.getItem("userId"),
-            videoId: movie.uuid,
-            watchDuration,
-            isCompleted: false,
-          },
-        });
-        toast.info("Watch history updated.");
-      } catch (error) {
-        console.error("Error updating watch history:", error);
-        toast.error("Failed to update watch history.");
-      }
-    }
-    closeModal(); // Close modal after handling
+  const handleCloseModal = () => {
+    setIsVideoModalOpen(false);
+    setVideoUrl("");
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        handleCloseModal();
+      }
+    };
+
+    if (isVideoModalOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isVideoModalOpen]);
 
   const handleFavorite = async () => {
     try {
@@ -128,22 +116,19 @@ const MovieCard = ({ movie, index, playVideo, closeModal }) => {
     }
   }, [movie.uuid]);
 
-  // Mock function to generate unique ID (use a library like uuid if needed)
-  const generateUniqueId = () => `id-${Date.now()}`;
-
   return (
     <div
-      key={index}
+      key={movie.uuid}
       className="min-w-[calc(33.333%-1rem)] w-[calc(33.333%-1rem)] rounded-lg overflow-hidden relative flex-shrink-0 cursor-pointer"
       onClick={handlePlay}
     >
       <img
-        src={movie.thumbnail?.thumbnailUrl || movie.imageUrl}
-        alt={movie.name}
+        src={movie.thumbnailUrl || movie.thumbnail?.thumbnailUrl || "fallback-image.jpg"}
+        alt={movie.name || "Movie Thumbnail"}
         className="w-full h-[150px] object-cover rounded-lg"
       />
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-white capitalize">{movie.name}</h3>
+        <h3 className="text-lg font-semibold text-white capitalize">{movie.name || "Untitled Movie"}</h3>
         <div className="flex justify-between items-center mt-2">
           <div className="flex">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -152,17 +137,43 @@ const MovieCard = ({ movie, index, playVideo, closeModal }) => {
                 onClick={() => handleRating(star)}
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
-                className={`cursor-pointer ${hoverRating >= star || currentRating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
+                className={`cursor-pointer ${hoverRating >= star || currentRating >= star ? "text-yellow-500" : "text-gray-400"}`}
               />
             ))}
           </div>
           <FaHeart
             onClick={handleFavorite}
-            className={`cursor-pointer ${isFavorited ? 'text-red-500' : 'text-gray-400'}`}
+            className={`cursor-pointer ${isFavorited ? "text-red-500" : "text-gray-400"}`}
           />
         </div>
         <p className="mt-1 text-sm text-gray-400">Average Rating: {averageRating}/5</p>
       </div>
+
+      {/* Conditional Progress Bar based on the section */}
+      {section === "continueWatching" && movie.progress !== undefined && (
+        <div
+          className="absolute bottom-0 left-0 h-1 bg-red-500"
+          style={{ width: `${movie.progress}%` }}
+        >
+          {/* Debugging log */}
+          <span className="text-white text-xs">{movie.progress}%</span>
+        </div>
+      )}
+
+      {/* Video Modal */}
+      {isVideoModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+          <div className="bg-white p-4 rounded-lg relative w-[75%] h-[75%] max-w-[1200px] max-h-[800px]">
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-2 right-2 text-black text-2xl"
+            >
+              &times;
+            </button>
+            <VideoPlayer src={videoUrl} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

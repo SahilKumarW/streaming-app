@@ -74,7 +74,7 @@ const VideoManagement = () => {
                         <Button
                             name={"Add Video"}
                             className={"bg-teal-500 text-white px-4 py-2 rounded"}
-                            onClick={() => navigate("/uploadVideo")}
+                            onClick={() => navigate("/dashboard/uploadVideo")}
                         />
                         {/* Add/Update Thumbnail button */}
                         <Button

@@ -21,14 +21,17 @@ const MyList = () => {
         // Fetch user's list
         const myListResponse = await VideoService.showVideoList();
         console.log('My List response:', myListResponse);
-        setMyListMovies(myListResponse);
 
-        // For similar movies, we'll use the same data for demonstration
-        // In a real app, you might want to fetch similar movies based on the user's list
-        setSimilarMovies(myListResponse);
+        // Ensure the response is an array
+        setMyListMovies(Array.isArray(myListResponse) ? myListResponse : []);
+
+        // For similar movies, reuse or process data as needed
+        setSimilarMovies(Array.isArray(myListResponse) ? myListResponse : []);
 
       } catch (error) {
         console.error("Error fetching data:", error);
+        setMyListMovies([]); // Fallback to an empty array
+        setSimilarMovies([]); // Fallback to an empty array
       } finally {
         setLoading({ myList: false, similar: false });
       }
@@ -57,10 +60,10 @@ const MyList = () => {
         button1Action={handleWatchNow}
         button2Action={handleRemoveFromList}
       />
-      
+
       {/* Full-width separator line above My List */}
       <hr className="border-t border-gray-700 w-full my-8" />
-      
+
       <div className="px-8 md:px-16 lg:px-32">
         <ScrollableRow
           title="My List"
@@ -68,10 +71,10 @@ const MyList = () => {
           movies={myListMovies}
         />
       </div>
-      
+
       {/* Full-width separator line between sections */}
       <hr className="border-t border-gray-700 w-full my-8" />
-      
+
       <div className="px-8 md:px-16 lg:px-32">
         <ScrollableRow
           title="Similar to These"

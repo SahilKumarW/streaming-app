@@ -14,37 +14,41 @@ const isAdmin = () => {
 };
 
 const VideoService = {
-    // Store video
+    // Function to store video with corrected request handling and admin check
     storeVideo: async (formData) => {
         const file = formData.get('video');
         if (!file || !(file instanceof File)) {
             throw new Error("Video file is missing or invalid.");
         }
 
+        // Check if the user is an admin
         if (!isAdmin()) {
             throw new Error("Only admins can upload videos.");
         }
 
-        const { token, userId } = getAuthData(); // Retrieve token and userId
+        // Retrieve authorization data
+        const { token, userId } = getAuthData();
         if (!userId) {
             throw new Error("User ID not found. Cannot proceed with upload.");
         }
 
-        const url = `${BASE_URL}/StoreVideo?uuid=${userId}`; // Ensure this is the correct UUID
+        // Construct the upload URL with userId as a query parameter
+        const url = `${BASE_URL}/StoreVideo`;
 
         try {
+            // Send POST request to upload the video
             const response = await post(url, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`, // Include token for authorization
+                    Authorization: `Bearer ${token}`, // Include token only if user is admin
                 },
                 maxContentLength: Infinity,
                 maxBodyLength: Infinity,
             });
-            return response.data; // Return the response data as needed
+            return response.data; // Return the response data if successful
         } catch (error) {
             console.error("Error uploading video:", error.response ? error.response.data : error.message);
-            throw error; // Re-throw the error to handle it later
+            throw error; // Re-throw the error for external handling
         }
     },
 
@@ -91,50 +95,50 @@ const VideoService = {
     },
 
     // Get user watch history
-    getUserWatchHistory: async () => {
-        const { token, userId } = getAuthData(); // Retrieve token and userId
-        if (!token || !userId) {
-            throw new Error('User is not authenticated');
-        }
+    // getUserWatchHistory: async () => {
+    //     const { token, userId } = getAuthData(); // Retrieve token and userId
+    //     if (!token || !userId) {
+    //         throw new Error('User is not authenticated');
+    //     }
 
-        try {
-            const response = await axios.get(`${BASE_URL}/get-user-watch-history?userId=${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'accept': 'text/plain', // Set the accept header as per the curl request
-                },
-            });
+    //     try {
+    //         const response = await axios.get(`${BASE_URL}/get-user-watch-history/${userId}`, {
+    //             headers: {
+    //                 'Authorization': `Bearer ${token}`,
+    //                 'accept': 'text/plain', // Set the accept header as per the curl request
+    //             },
+    //         });
 
-            const watchHistory = response.data.data || []; // Get the 'data' array from the response
+    //         const watchHistory = response.data.data || []; // Get the 'data' array from the response
 
-            // Format and return the watch history in a more structured way
-            const formattedHistory = watchHistory.map(item => ({
-                id: item.id,
-                videoId: item.videoId,
-                videoName: item.videoName,
-                watchedOn: item.watchedOn,
-                watchDuration: item.watchDuration,
-                isCompleted: item.isCompleted,
-                videoDetails: {
-                    name: item.videoDetails.name,
-                    genre: item.videoDetails.genre,
-                    category: item.videoDetails.category,
-                    url: item.videoDetails.url,
-                    thumbnailUrl: item.videoDetails.thumbnail.thumbnailUrl,
-                },
-                userDetails: {
-                    userId: item.userDetails.id,
-                    userName: item.userDetails.name,
-                    userEmail: item.userDetails.email,
-                },
-            }));
+    //         // Format and return the watch history in a more structured way
+    //         const formattedHistory = watchHistory.map(item => ({
+    //             id: item.id,
+    //             videoId: item.videoId,
+    //             videoName: item.videoName,
+    //             watchedOn: item.watchedOn,
+    //             watchDuration: item.watchDuration,
+    //             isCompleted: item.isCompleted,
+    //             videoDetails: {
+    //                 name: item.videoDetails.name,
+    //                 genre: item.videoDetails.genre,
+    //                 category: item.videoDetails.category,
+    //                 url: item.videoDetails.url,
+    //                 thumbnailUrl: item.videoDetails.thumbnail.thumbnailUrl,
+    //             },
+    //             userDetails: {
+    //                 userId: item.userDetails.id,
+    //                 userName: item.userDetails.name,
+    //                 userEmail: item.userDetails.email,
+    //             },
+    //         }));
 
-            return formattedHistory; // Return the formatted history
-        } catch (error) {
-            console.error("Error fetching user watch history:", error.response?.data || error.message);
-            throw error; // Re-throw the error to handle it later
-        }
-    },
+    //         return formattedHistory; // Return the formatted history
+    //     } catch (error) {
+    //         console.error("Error fetching user watch history:", error.response?.data || error.message);
+    //         throw error; // Re-throw the error to handle it later
+    //     }
+    // },
 
     // Upload thumbnail to the server
     uploadThumbnail: async (formData, token) => {
@@ -214,7 +218,7 @@ const VideoService = {
     getAverageRating: async (videoId) => {
         const { token } = getAuthData();
         try {
-            const response = await get(`${BASE_URL}/average-rating?VedioId=${videoId}`, {
+            const response = await get(`${BASE_URL}/average-rating/${videoId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -263,30 +267,37 @@ const VideoService = {
         }
     },
 
-    // Search videos
-    searchVideos: async (query) => {
-        const { token } = getAuthData();
+    searchVideos: async ({ name, genre, category }) => {
+        const { token } = getAuthData(); // Retrieve the auth token
         try {
-            const response = await get(`${BASE_URL}/Search?query=${encodeURIComponent(query)}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const response = await get(
+                `${BASE_URL}/Search`,
+                {
+                    params: {
+                        Name: name || "", // Send empty if not provided
+                        Genre: genre || "",
+                        Category: category || "",
+                    },
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Include auth token
+                    },
+                }
+            );
 
-            if (!response.data || response.data.length === 0) {
-                console.warn("No videos found for the query:", query);
-                return []; // Return an empty array if no results
-            }
-
-            return response.data; // Return the search results
+            return response.data || []; // Return the response data or an empty array if no data
         } catch (error) {
-            console.error("Error searching videos:", error.response ? error.response.data : error.message);
-            throw error; // Re-throw the error for further handling
+            console.error(
+                "Error searching videos:",
+                error.response ? error.response.data : error.message
+            );
+            throw error; // Rethrow for further handling
         }
     },
 
     // Show video list
     showVideoList: async () => {
         const { token, userId } = getAuthData(); // Get userId from local storage
-        const url = `${BASE_URL}/show-vedio-list?UserId=${userId}`; // Use userId from local storage
+        const url = `${BASE_URL}/show-vedio-list/${userId}`; // Use userId from local storage
         return await get(url, {
             headers: {
                 Authorization: `Bearer ${token}`, // Include Authorization header
@@ -322,7 +333,7 @@ const VideoService = {
     // Get user watch history
     getUserWatchHistory: async () => {
         const { token, userId } = getAuthData(); // Get userId for the request
-        return await get(`${BASE_URL}/get-user-watch-history?userId=${userId}`, {
+        return await get(`${BASE_URL}/get-user-watch-history/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
     },

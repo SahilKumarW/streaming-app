@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import HeroSection from "../components/HeroSection";
 import ScrollableRow from "../components/ScrollableRow";
 import VideoService from "../api/videoService";
 import homeImage from "../assets/home.png";
 import Footer from "../components/Footer";
-import { useNavigate } from "react-router-dom";
-import { getAuthData } from "../api/axios"; // Import getAuthData
+import VideoPlayer from "./VideoPlayer"; // Import VideoPlayer
+import { getAuthData } from "../api/axios";
 
 const Home = () => {
   const [recommendedMoviesList, setRecommendedMoviesList] = useState([]);
@@ -19,12 +19,9 @@ const Home = () => {
     continueWatching: true,
   });
 
-  const { userId } = getAuthData(); // Use getAuthData to retrieve userId
-  const navigate = useNavigate(); // To navigate to video player
+  const [movieSelected, setMovieSelected] = useState(null); // State to store the selected movie
 
-  const [currentVideo, setCurrentVideo] = useState(null); // For tracking the currently playing video
-  const [videoDuration, setVideoDuration] = useState(0); // For tracking video duration
-  const timerRef = useRef(null); // Timer reference for tracking video progress
+  const { userId } = getAuthData();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,11 +44,13 @@ const Home = () => {
         setTopRatedMoviesList(topRatedResponse.data || []);
         setTopTvShowList(topTvShowsResponse);
 
-        const updatedHistory = watchHistoryResponse.data.map((video) => {
-          const progress = calculateProgress(video.watchDuration);
-          return { ...video, progress, lastWatched: new Date(video.watchedOn).toISOString() };
-        });
-        setContinueWatchingList(updatedHistory);
+        setContinueWatchingList(
+          watchHistoryResponse.data.map((item) => ({
+            ...item.videoDetails,
+            progress: calculateProgressPercentage(item.watchDuration, item.videoDetails.duration),
+            watchDuration: item.watchDuration,
+          })) || []
+        );
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -67,74 +66,36 @@ const Home = () => {
     fetchData();
   }, [userId]);
 
-  // Function to calculate the progress in seconds
-  const calculateProgress = (duration) => {
+  const calculateProgressPercentage = (watchedDuration, totalDuration) => {
+    if (!watchedDuration || !totalDuration) return 0;
+
+    const watchedSeconds = parseDuration(watchedDuration);
+    const totalSeconds = parseDuration(totalDuration);
+
+    return Math.min(100, (watchedSeconds / totalSeconds) * 100);
+  };
+
+  const parseDuration = (duration) => {
+    if (!duration || typeof duration !== "string") {
+      console.warn("Invalid duration format:", duration);
+      return 0;
+    }
+
     const [hours, minutes, seconds] = duration.split(":").map(Number);
-    const progressInSeconds = hours * 3600 + minutes * 60 + seconds;
-    return progressInSeconds;
-  };
-
-  // Function to handle the "Continue Watching" click
-  const handleContinueWatching = (video) => {
-    const { videoId, videoDetails } = video;
-    const startFrom = video.progress; // Start from the last watched position in seconds
-    console.log(`Continuing video "${videoDetails.name}" from ${startFrom} seconds`);
-    navigate(`/player/${videoId}`, { state: { startFrom, videoDetails } });
-  };
-
-  // Function to start a new video and track progress
-  const playVideo = async (videoId, videoName) => {
-    setCurrentVideo({ videoId, videoName });
-    const startTime = Date.now(); // Record the start time
-    setVideoDuration(0); // Reset duration to 0
-    timerRef.current = setInterval(() => {
-      setVideoDuration(Math.floor((Date.now() - startTime) / 1000)); // Update duration every second
-    }, 1000);
-
-    // Add video to watch history
-    const watchedOn = new Date().toISOString();
-    VideoService.watchHistoryAdd({
-      userId,
-      videoId,
-      vedioName: videoName,
-      watchedOn,
-      watchDuration: 0,
-      isCompleted: false,
-    });
-  };
-
-  // Function to stop the video and update the watch history
-  const stopVideo = async (isCompleted) => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current); // Stop the timer
+    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
+      console.warn("Invalid numeric values in duration:", duration);
+      return 0;
     }
 
-    const watchedOn = new Date().toISOString();
-    const videoDurationInSeconds = videoDuration;
+    return hours * 3600 + minutes * 60 + seconds;
+  };
 
-    // Update the watch history with the final duration
-    await VideoService.watchHistoryUpdate({
-      userId,
-      videoId: currentVideo.videoId,
-      vedioName: currentVideo.videoName,
-      watchedOn,
-      watchDuration: videoDurationInSeconds,
-      isCompleted,
-    });
+  const handleCardClick = (movie) => {
+    // Log the movie name and watch duration to the console
+    console.log(`Movie: ${movie.name}, Watch Duration: ${movie.watchDuration}`);
 
-    // If the video wasn't completed, add to "Continue Watching"
-    if (!isCompleted) {
-      setContinueWatchingList((prev) => [
-        ...prev,
-        {
-          ...currentVideo,
-          progress: videoDurationInSeconds,
-        },
-      ]);
-    }
-
-    setCurrentVideo(null); // Reset current video state
-    setVideoDuration(0); // Reset video duration
+    // Set the selected movie
+    setMovieSelected(movie); // Update state with the selected movie
   };
 
   return (
@@ -147,23 +108,43 @@ const Home = () => {
         button1Text="Watch Now"
         button2Text="Add Watchlist"
       />
+
+      {/* Render VideoPlayer if a movie is selected */}
+      {movieSelected && (
+        <VideoPlayer
+          src={movieSelected.url}
+          startTime={parseDuration(movieSelected.watchDuration)} // Convert watchDuration to startTime
+        />
+      )}
+
       <div className="px-8 md:px-16 lg:px-32 mt-8">
         <ScrollableRow
           title="Continue Watching"
           loading={loading.continueWatching}
-          movies={continueWatchingList.map((video) => ({
-            ...video,
-            onClick: () => handleContinueWatching(video), // Pass click handler
-            progress: (video.progress / video.videoDuration) * 100, // Calculate progress percentage
+          movies={continueWatchingList.map((item) => ({
+            ...item,
+            onClick: () => handleCardClick(item),
+            progressBar: (
+              <div className="progress-bar-container" style={{ width: "100%", backgroundColor: "#ddd" }}>
+                <div
+                  className="progress-bar"
+                  style={{
+                    width: `${item.progress}%`,
+                    backgroundColor: "red",
+                    height: "6px",
+                    borderRadius: "4px",
+                  }}
+                ></div>
+              </div>
+            ),
           }))}
-          showProgress={true}
         />
         <ScrollableRow
           title="Recommendations"
           loading={loading.recommended}
           movies={recommendedMoviesList.map((movie) => ({
             ...movie,
-            onClick: () => playVideo(movie.uuid, movie.name), // Start video on click
+            onClick: () => handleCardClick(movie), // Use handleCardClick here
           }))}
         />
         <ScrollableRow
@@ -171,7 +152,7 @@ const Home = () => {
           loading={loading.topRated}
           movies={topRatedMoviesList.map((movie) => ({
             ...movie,
-            onClick: () => playVideo(movie.uuid, movie.name), // Start video on click
+            onClick: () => handleCardClick(movie), // Use handleCardClick here
           }))}
         />
         <ScrollableRow
@@ -179,10 +160,11 @@ const Home = () => {
           loading={loading.topShows}
           movies={topTvShowList.map((movie) => ({
             ...movie,
-            onClick: () => playVideo(movie.uuid, movie.name), // Start video on click
+            onClick: () => handleCardClick(movie), // Use handleCardClick here
           }))}
         />
       </div>
+
       <Footer />
     </>
   );

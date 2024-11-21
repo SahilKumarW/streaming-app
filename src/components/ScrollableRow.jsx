@@ -2,13 +2,14 @@ import React, { useState, useRef } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import MovieCard from "./MovieCard";
-import VideoService from "../api/videoService";
+import VideoPlayer from "../pages/VideoPlayer"; // Import VideoPlayer component
 
 const ScrollableRow = ({ title, movies, loading }) => {
   const scrollRef = useRef(null);
   const [playingUrl, setPlayingUrl] = useState(null);
 
   const playVideo = (url) => {
+    console.log('Video URL:', url); // Debugging log
     setPlayingUrl(url); // Set video URL to play
     document.body.style.overflow = "hidden"; // Prevent scrolling on the background
   };
@@ -43,6 +44,7 @@ const ScrollableRow = ({ title, movies, loading }) => {
               <MovieCard
                 key={movie.uuid}
                 movie={movie}
+                section={title === "Continue Watching" ? "continueWatching" : ""} // Dynamically pass section
                 index={index}
                 playVideo={playVideo} // Pass the playVideo function to MovieCard
               />
@@ -58,13 +60,11 @@ const ScrollableRow = ({ title, movies, loading }) => {
         </div>
       )}
 
+      {/* Show VideoPlayer if playingUrl is set */}
       {playingUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="w-full h-[90vh] max-w-5xl flex justify-center items-center relative overflow-hidden">
-            <video className="w-full h-full object-contain" controls autoPlay>
-              <source src={playingUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            <VideoPlayer src={playingUrl} /> {/* Render VideoPlayer component */}
             <button onClick={closeVideo} className="absolute top-4 right-4 text-white text-4xl">
               &times;
             </button>

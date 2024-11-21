@@ -1,42 +1,19 @@
-import React, { useEffect, useRef } from "react";
-import videojs from "video.js";
-import "video.js/dist/video-js.css";
+import React, { useRef, useEffect } from "react";
 
-const VideoPlayer = ({ src }) => {
+const VideoPlayer = ({ src, watchDuration }) => {
   const videoRef = useRef(null);
-  const playerRef = useRef(null);
 
   useEffect(() => {
-    if (!playerRef.current) {
-      const videoElement = videoRef.current;
-      if (!videoElement) return;
-
-      // Create a Video.js player
-      const player = videojs(videoElement, {
-        controls: true,
-        fluid: true,
-        sources: [{ src, type: 'video/mp4' }] // Change MIME type to 'video/mp4'
-      });
-
-      playerRef.current = player;
-    } else {
-      // Update the source when it changes
-      playerRef.current.src({ src, type: 'video/mp4' });
+    if (videoRef.current && watchDuration) {
+      videoRef.current.currentTime = watchDuration; // Set video start time based on watchDuration
     }
-
-    // Dispose the player on unmount
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.dispose();
-        playerRef.current = null;
-      }
-    };
-  }, [src]);
+  }, [watchDuration]);
 
   return (
-    <div data-vjs-player>
-      <video ref={videoRef} className="video-js vjs-big-play-centered" />
-    </div>
+    <video ref={videoRef} controls className="w-full h-full">
+      <source src={src} type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
   );
 };
 
