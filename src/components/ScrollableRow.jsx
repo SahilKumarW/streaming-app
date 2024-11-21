@@ -6,16 +6,19 @@ import VideoPlayer from "../pages/VideoPlayer"; // Import VideoPlayer component
 
 const ScrollableRow = ({ title, movies, loading }) => {
   const scrollRef = useRef(null);
-  const [playingUrl, setPlayingUrl] = useState(null);
+  const [playingVideo, setPlayingVideo] = useState(null); // Store selected video details
 
-  const playVideo = (url) => {
-    console.log('Video URL:', url); // Debugging log
-    setPlayingUrl(url); // Set video URL to play
+  const playVideo = (movie) => {
+    console.log("Playing movie:", movie.name); // Debugging log
+    setPlayingVideo({
+      url: movie.url,
+      watchDuration: movie.watchDuration,
+    });
     document.body.style.overflow = "hidden"; // Prevent scrolling on the background
   };
 
   const closeVideo = () => {
-    setPlayingUrl(null); // Close video modal
+    setPlayingVideo(null); // Close video modal
     document.body.style.overflow = "auto"; // Enable scrolling on the background
   };
 
@@ -46,7 +49,7 @@ const ScrollableRow = ({ title, movies, loading }) => {
                 movie={movie}
                 section={title === "Continue Watching" ? "continueWatching" : ""} // Dynamically pass section
                 index={index}
-                playVideo={playVideo} // Pass the playVideo function to MovieCard
+                playVideo={() => playVideo(movie)} // Pass the playVideo function with movie details
               />
             ))}
           </div>
@@ -60,11 +63,14 @@ const ScrollableRow = ({ title, movies, loading }) => {
         </div>
       )}
 
-      {/* Show VideoPlayer if playingUrl is set */}
-      {playingUrl && (
+      {/* Show VideoPlayer if a video is selected */}
+      {playingVideo && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="w-full h-[90vh] max-w-5xl flex justify-center items-center relative overflow-hidden">
-            <VideoPlayer src={playingUrl} /> {/* Render VideoPlayer component */}
+            <VideoPlayer
+              src={playingVideo.url}
+              watchDuration={playingVideo.watchDuration} // Pass watchDuration
+            />
             <button onClick={closeVideo} className="absolute top-4 right-4 text-white text-4xl">
               &times;
             </button>

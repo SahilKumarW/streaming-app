@@ -94,8 +94,11 @@ const Home = () => {
     // Log the movie name and watch duration to the console
     console.log(`Movie: ${movie.name}, Watch Duration: ${movie.watchDuration}`);
 
-    // Set the selected movie
-    setMovieSelected(movie); // Update state with the selected movie
+    // Parse and convert watchDuration to seconds
+    const startTime = parseDuration(movie.watchDuration);
+
+    // Set the selected movie with start time
+    setMovieSelected({ ...movie, startTime });
   };
 
   return (

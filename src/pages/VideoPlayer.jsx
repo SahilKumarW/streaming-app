@@ -1,19 +1,24 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
-const VideoPlayer = ({ src, watchDuration }) => {
+const VideoPlayer = ({ src, startAt }) => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (videoRef.current && watchDuration) {
-      videoRef.current.currentTime = watchDuration; // Set video start time based on watchDuration
+    if (videoRef.current && startAt) {
+      videoRef.current.currentTime = parseDuration(startAt);
     }
-  }, [watchDuration]);
+  }, [startAt]);
+
+  const parseDuration = (duration) => {
+    // Convert duration in "HH:MM:SS" or "MM:SS" to seconds
+    const parts = duration.split(":").map(Number);
+    return parts.length === 3
+      ? parts[0] * 3600 + parts[1] * 60 + parts[2]
+      : parts[0] * 60 + parts[1];
+  };
 
   return (
-    <video ref={videoRef} controls className="w-full h-full">
-      <source src={src} type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+    <video ref={videoRef} src={src} controls autoPlay className="w-full h-full" />
   );
 };
 
