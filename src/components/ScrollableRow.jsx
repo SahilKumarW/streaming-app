@@ -2,19 +2,37 @@ import React, { useState, useRef } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import MovieCard from "./MovieCard";
-import VideoPlayer from "../pages/VideoPlayer"; // Import VideoPlayer component
+import VideoService from "../api/videoService"; // Ensure VideoService is imported
 
 const ScrollableRow = ({ title, movies, loading }) => {
   const scrollRef = useRef(null);
   const [playingVideo, setPlayingVideo] = useState(null); // Store selected video details
 
-  const playVideo = (movie) => {
+  // Play video with watch duration
+  const playVideo = async (movie) => {
     console.log("Playing movie:", movie.name); // Debugging log
-    setPlayingVideo({
-      url: movie.url,
-      watchDuration: movie.watchDuration,
-    });
-    document.body.style.overflow = "hidden"; // Prevent scrolling on the background
+
+    // Fetch watch duration from user history
+    try {
+      const response = await VideoService.getUserWatchHistory(localStorage.getItem("userId"));
+      const watchHistory = response?.data || [];
+      const videoHistory = watchHistory.find((item) => item.videoId === movie.uuid);
+
+      let watchDuration = 0;
+      if (videoHistory) {
+        // Convert watchDuration from HH:MM:SS to seconds
+        const [hours, minutes, seconds] = videoHistory.watchDuration.split(":").map(Number);
+        watchDuration = hours * 3600 + minutes * 60 + seconds;
+      }
+
+      setPlayingVideo({
+        url: movie.url,
+        watchDuration: watchDuration, // Set the fetched watchDuration
+      });
+      document.body.style.overflow = "hidden"; // Prevent scrolling on the background
+    } catch (error) {
+      console.error("Error fetching watch history:", error);
+    }
   };
 
   const closeVideo = () => {

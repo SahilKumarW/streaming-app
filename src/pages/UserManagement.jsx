@@ -101,7 +101,7 @@ const UserManagement = () => {
                     <Button
                         name={"Add User"}
                         className={"bg-teal-500 text-white px-4 py-2 rounded"}
-                        onClick={() => navigate("/addUser")}
+                        onClick={() => navigate("/dashboard/addUser")}
                     />
                 </div>
                 <div className="flex items-end pb-0">

@@ -31,7 +31,8 @@ import VideoManagement from "./pages/VideoManagement";
 import UserTable from "./components/UserTable";
 import UploadThumbnail from "./pages/UploadThumbnail";
 import CreateCustomer from "./pages/CreateCustomer";
-import PrivateRoute from "./components/PrivateRoute";
+import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
+import AccessDenied from "./pages/AccessDenied"; // Import AccessDenied Page
 
 // Mock Navigation for the video
 function MockLogin() {
@@ -112,9 +113,8 @@ function App() {
     <Router>
       {/* <Navbar /> */}
       <Routes>
-        <Route path="/login" element={<MockLogin />} />
-        <Route path="/signup" element={<MockSignup />} />
-        {/* <Route path="/reset" element={<MockForgotPassword />} /> */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/reset" element={<Reset />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
@@ -122,28 +122,27 @@ function App() {
         <Route path="/account-settings" element={<AccountSettings />} />
         <Route path="/subscription" element={<Subscription />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/" element={<MockLogin />} />
+        <Route path="/" element={<Login />} />
         <Route path="/movies" element={<Movies />} />
         <Route path="/tvseries" element={<TvSeries />} />
         <Route path="/mylist" element={<MyList />} />
         <Route path="/player" element={<VideoPlayer />} />
         <Route path="/videos/:videoId" element={<VideoPlayer />} />
 
-        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-        {/* Dashboard route with nested child routes */}
-        <Route path="/dashboard" element={<Dashboard />}>
-          <Route path="user-management" element={<UserManagement />}>
-            <Route path=":userId" element={<UserTable />} />
-          </Route>
-          <Route path="video-management" element={<VideoManagement />}>
-            <Route path=":id" element={<VideoManagement />} />
-          </Route>
+        {/* Protect the dashboard and its routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} >
+          <Route path="user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+          <Route path="user-management/:userId" element={<ProtectedRoute><UserTable /></ProtectedRoute>} />
+          <Route path="video-management" element={<ProtectedRoute><VideoManagement /></ProtectedRoute>} />
+          <Route path="video-management/:id" element={<ProtectedRoute><VideoManagement /></ProtectedRoute>} />
+          <Route path="addUser" element={<ProtectedRoute><AddUser /></ProtectedRoute>} />
+          <Route path="uploadVideo" element={<ProtectedRoute><UploadVideo /></ProtectedRoute>} />
+          <Route path="uploadThumbnail" element={<ProtectedRoute><UploadThumbnail /></ProtectedRoute>} />
+          <Route path="create-customer" element={<ProtectedRoute><CreateCustomer /></ProtectedRoute>} />
         </Route>
 
-        <Route path="/dashboard/addUser" element={<AddUser />} />
-        <Route path="/dashboard/uploadVideo" element={<UploadVideo />} />
-        <Route path="/dashboard/uploadThumbnail" element={<UploadThumbnail />} />
-        <Route path="/dashboard/create-customer" element={<CreateCustomer />} />      
+        {/* Access Denied Page */}
+        <Route path="/access-denied" element={<AccessDenied />} />
       </Routes>
     </Router>
   );

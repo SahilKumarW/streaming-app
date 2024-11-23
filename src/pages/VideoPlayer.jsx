@@ -1,24 +1,34 @@
 import React, { useEffect, useRef } from "react";
 
-const VideoPlayer = ({ src, startAt }) => {
-  const videoRef = useRef(null);
-
+const VideoPlayer = ({ src, startAt, onClose, videoRef }) => {
   useEffect(() => {
-    if (videoRef.current && startAt) {
-      videoRef.current.currentTime = parseDuration(startAt);
+    if (videoRef.current) {
+      console.log("StartAt:", startAt); // Log to verify
+      if (!isNaN(startAt)) {
+        videoRef.current.currentTime = startAt; // Set currentTime in seconds
+      } else {
+        videoRef.current.currentTime = 0; // Fallback to 0 if invalid
+      }
     }
-  }, [startAt]);
+  }, [startAt, videoRef]);
 
-  const parseDuration = (duration) => {
-    // Convert duration in "HH:MM:SS" or "MM:SS" to seconds
-    const parts = duration.split(":").map(Number);
-    return parts.length === 3
-      ? parts[0] * 3600 + parts[1] * 60 + parts[2]
-      : parts[0] * 60 + parts[1];
+  // Handle video end and pass watch duration
+  const handleVideoEnded = () => {
+    if (videoRef.current) {
+      const watchDuration = videoRef.current.duration;
+      onClose(watchDuration);
+    }
   };
 
   return (
-    <video ref={videoRef} src={src} controls autoPlay className="w-full h-full" />
+    <video
+      ref={videoRef}
+      src={src}
+      controls
+      autoPlay
+      className="w-full h-full"
+      onEnded={handleVideoEnded}
+    />
   );
 };
 

@@ -29,6 +29,7 @@
     "react-router-dom": "^6.26.1",
     "react-spinners": "^0.14.1",
     "react-toastify": "^10.0.6",
+    "styled-components": "^6.1.13",
     "uuid": "^11.0.2",
     "video.js": "^8.17.3",
     "videojs-hls-quality-selector": "^2.0.0",

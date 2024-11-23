@@ -45,11 +45,16 @@ const Home = () => {
         setTopTvShowList(topTvShowsResponse);
 
         setContinueWatchingList(
-          watchHistoryResponse.data.map((item) => ({
-            ...item.videoDetails,
-            progress: calculateProgressPercentage(item.watchDuration, item.videoDetails.duration),
-            watchDuration: item.watchDuration,
-          })) || []
+          watchHistoryResponse.data
+            .filter((item) => {
+              // Filter movies that have a valid URL and are not completed
+              return item.videoDetails.url && item.videoDetails.isCompleted !== "true";
+            })
+            .map((item) => ({
+              ...item.videoDetails,
+              progress: calculateProgressPercentage(item.watchDuration, item.videoDetails.duration),
+              watchDuration: item.watchDuration,
+            })) || []
         );
       } catch (error) {
         console.error("Error fetching data:", error);

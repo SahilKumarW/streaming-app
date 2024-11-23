@@ -55,41 +55,57 @@ const VideoService = {
     // API call to add video to watch history
     watchHistoryAdd: async ({ userId, videoId, vedioName, watchedOn, watchDuration, isCompleted }) => {
         try {
-            const response = await post('/watch-history-add', {
+            // Ensure watchDuration is a string in the correct format (e.g., "00:00:30")
+            const formattedWatchDuration = watchDuration === 0 ? "00:00:00" : watchDuration; // Adjust as needed
+
+            const response = await post(`${BASE_URL}/watch-history-add`, {
                 userId,
                 videoId,
                 vedioName,
                 watchedOn,
-                watchDuration,
+                watchDuration: formattedWatchDuration, // Ensure correct format
                 isCompleted,
             }, getAuthData());
-            console.log("Sending watch history data:", { userId, videoId, vedioName, watchedOn, watchDuration, isCompleted });
+
+            console.log("Sending watch history data:", { userId, videoId, vedioName, watchedOn, formattedWatchDuration, isCompleted });
+
             return response.data;
         } catch (error) {
+            // Handle error more thoroughly
             if (error.response) {
-                console.error("Error response from server:", error.response.data); // Logs the server response error details
-                console.error("Error status:", error.response.status); // Logs the HTTP status code
+                console.error("Error response from server:", error.response.data); // Server error details
+                console.error("Error status:", error.response.status); // Status code
+            } else if (error.request) {
+                console.error("No response received from server:", error.request); // Network error or no response
             } else {
-                console.error("Error message:", error.message); // Logs the error message if no response is received
+                console.error("Error message:", error.message); // General error message
             }
-            throw error; // Re-throw the error to handle it later
+
+            throw error; // Re-throw to handle it later
         }
     },
 
     // API call to update watch history
-    watchHistoryUpdate: async ({ userId, videoId, vedioName, watchedOn, watchDuration, isCompleted }) => {
+    watchHistoryUpdate: async (
+        { userId, videoId, vedioName, watchedOn, watchDuration, isCompleted },
+        watchHistoryId
+    ) => {
         try {
-            const response = await put('/watch-history-update', {
-                userId,
-                videoId,
-                vedioName,
-                watchedOn,
-                watchDuration,
-                isCompleted,
-            }, getAuthData());
+            const response = await post(
+                `${BASE_URL}/watch-history-update/${watchHistoryId}`,
+                {
+                    userId,
+                    videoId,
+                    vedioName,
+                    watchedOn,
+                    watchDuration,
+                    isCompleted,
+                },
+                getAuthData()
+            );
             return response.data;
         } catch (error) {
-            console.error('Error updating watch history:', error);
+            console.error("Error updating watch history:", error);
             throw error;
         }
     },
@@ -346,26 +362,31 @@ const VideoService = {
     //     });
     // },
 
-    // Get favorite videos for a user
-    getFavoriteVideos: async () => {
-        const { token, userId } = getAuthData();
-        return await get(`${BASE_URL}/get-favorite-videos/${userId}`, {
+    // Fetch favorite videos for a user
+    getFavoriteVideos: async (userId) => {
+        const { token } = getAuthData();
+        const response = await get(`${BASE_URL}/get-favorite-videos/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
+        return response.data;
     },
 
     // Add favorite video
-    addFavoriteVideo: async (favoriteData) => {
+    addFavoriteVideo: async ({ videoId, userId }) => {
         const { token } = getAuthData();
-        return await post(`${BASE_URL}/add-favorite-video`, favoriteData, {
+
+        const url = `${BASE_URL}/add-favorite-video?videoId=${videoId}&userId=${userId}`;
+
+        return await post(url, null, {
             headers: { Authorization: `Bearer ${token}` },
         });
     },
 
     // Remove favorite video
-    removeFavoriteVideo: async (favoriteData) => {
+    removeFavoriteVideo: async ({ videoId, userId }) => {
         const { token } = getAuthData();
-        return await put(`${BASE_URL}/remove-favorite-video`, favoriteData, {
+        const url = `${BASE_URL}/remove-favorite-video?videoId=${videoId}&userId=${userId}`;
+        return await put(url, null, {
             headers: { Authorization: `Bearer ${token}` },
         });
     },
