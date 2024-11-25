@@ -21,6 +21,7 @@ const AccountSettings = () => {
   const [isDOBModalOpen, setIsDOBModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isAccountActionModalOpen, setIsAccountActionModalOpen] = useState(false); 
+  const [movies, setMovies] = useState([]);
 
   
 
@@ -76,7 +77,7 @@ const AccountSettings = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar setMovies={setMovies} />
       <div className={`flex flex-col justify-center items-center bg-black ${ isEmailModalOpen || isPasswordModalOpen || isDOBModalOpen || isSubscriptionModalOpen || isAccountActionModalOpen ? 'blur-background' : ''}`}>
         <p className='text-[28px] leading-[38px] font-semibold text-white'>Account Settings</p>
         <p className='text-[10px] leading-[22px] font-normal text-[#FFFFFF]'>This is lorem ipsum text used for dummy purpose</p>

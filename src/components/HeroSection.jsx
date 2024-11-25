@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "./Navbar";
 import { FaPlay, FaBookmark } from 'react-icons/fa';
 
 const HeroSection = ({ backgroundImage, Movie,movieTitle, subTitle, button1Text, button2Text, button1Action, button2Action }) => {
+  const [movies, setMovies] = useState([]);
   return (
     <>
       <div className="relative w-full h-[600px]">
@@ -19,7 +20,7 @@ const HeroSection = ({ backgroundImage, Movie,movieTitle, subTitle, button1Text,
 
         {/* Navbar */}
         <div className="relative z-20">
-          <Navbar />
+          <Navbar setMovies={setMovies} />
         </div>
 
         {/* Content */}

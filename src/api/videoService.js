@@ -1,4 +1,5 @@
 import instance from './axios'; // Ensure this is configured correctly
+import axios from 'axios';
 import { post, get, put, getAuthData } from './axios';
 
 const BASE_URL = '/UploadVedios';
@@ -286,27 +287,30 @@ const VideoService = {
     searchVideos: async ({ name, genre, category }) => {
         const { token } = getAuthData(); // Retrieve the auth token
         try {
-            const response = await get(
-                `${BASE_URL}/Search`,
-                {
-                    params: {
-                        Name: name || "", // Send empty if not provided
-                        Genre: genre || "",
-                        Category: category || "",
-                    },
-                    headers: {
-                        Authorization: `Bearer ${token}`, // Include auth token
-                    },
-                }
-            );
+            // Build params object dynamically
+            const params = {};
+            if (name) params.Name = name;
+            if (genre) params.Genre = genre;
+            if (category) params.Category = category;
 
-            return response.data || []; // Return the response data or an empty array if no data
+            // Ensure BASE_URL is valid (you may need to prepend the full URL if BASE_URL is a relative path)
+            const fullUrl = `${BASE_URL}/Search`; // Ensure BASE_URL is an absolute URL or prepend the base domain if it's relative
+            const urlWithParams = `${fullUrl}?${new URLSearchParams(params).toString()}`;
+
+            console.log("Payload URL with Params:", urlWithParams); // Log the full URL
+
+            // Make the API request
+            const response = await get(urlWithParams, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Include the authorization token
+                },
+            });
+
+            console.log("Search API Response:", response.data); // Log the response for debugging
+            return response.data;
         } catch (error) {
-            console.error(
-                "Error searching videos:",
-                error.response ? error.response.data : error.message
-            );
-            throw error; // Rethrow for further handling
+            console.error("Error in Search API:", error); // Log any errors
+            throw error; // Re-throw the error if needed
         }
     },
 

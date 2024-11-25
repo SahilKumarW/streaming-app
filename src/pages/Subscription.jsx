@@ -9,6 +9,7 @@ const Subscription = () => {
   const [plans, setPlans] = useState([]); // State to hold subscription plans
   const [loading, setLoading] = useState(true); // State for loading
   const [error, setError] = useState(null); // State to hold error messages
+  const [movies, setMovies] = useState([]);
 
   useEffect(() => {
     // Fetch subscription plans when the component mounts
@@ -38,7 +39,7 @@ const Subscription = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar setMovies={setMovies} />
       <div className='mt-[95px] px-8'>
         {/* "Choose the plan" section */}
         <div className='mb-[40px]'>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import search from "../assets/search.svg";
 import setting from "../assets/setting.svg";
 import profile from "../assets/profile.svg";
@@ -7,6 +7,7 @@ import VideoService from "../api/videoService"; // Import VideoService
 import MovieCard from "./MovieCard"; // Import MovieCard component
 
 const Navbar = ({ setMovies }) => {
+  const navigate = useNavigate();
   console.log("Set Movies Received: ", setMovies); // This should log the setMovies function if passed correctly
   const location = useLocation();
   const [showSearchInputs, setShowSearchInputs] = useState(false);
@@ -22,7 +23,14 @@ const Navbar = ({ setMovies }) => {
         category: searchByCategory,
       });
 
-      setMovies(results); // Pass the results to parent or state to render
+      console.log("Search Results from API:", results); // Log API results
+      if (Array.isArray(results) && results.length > 0) {
+        setMovies(results); // Update state in parent
+        console.log("Movies state updated:", results); // Confirm state update
+        navigate("/search-results", { state: { movies: results } }); // Navigate to search results page
+      } else {
+        console.log("No search results found.");
+      }
     } catch (error) {
       console.error("Error during search:", error);
     }
@@ -129,7 +137,7 @@ const Navbar = ({ setMovies }) => {
             >
               <option value="">Search by Category</option>
               <option value="Movies">Movies</option>
-              <option value="TV Series">TV Series</option>
+              <option value="TVShows">TV Series</option>
             </select>
 
             <select

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -33,6 +33,7 @@ import UploadThumbnail from "./pages/UploadThumbnail";
 import CreateCustomer from "./pages/CreateCustomer";
 import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
 import AccessDenied from "./pages/AccessDenied"; // Import AccessDenied Page
+import SearchResults from "./pages/SearchResults";
 
 // Mock Navigation for the video
 function MockLogin() {
@@ -109,6 +110,13 @@ function MockForgotPassword() {
 }
 
 function App() {
+  const [movies, setMovies] = useState([]); // Central state for search results
+  useEffect(() => {
+    console.log("Movies state updated:", movies); // Debugging state updates
+  }, [movies]);
+
+  <Route path="/search-results" element={<SearchResults movies={movies} />} />
+
   return (
     <Router>
       {/* <Navbar /> */}
@@ -128,17 +136,81 @@ function App() {
         <Route path="/mylist" element={<MyList />} />
         <Route path="/player" element={<VideoPlayer />} />
         <Route path="/videos/:videoId" element={<VideoPlayer />} />
+        <Route path="/search-results" element={<SearchResults movies={movies} />} />
 
-        {/* Protect the dashboard and its routes */}
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} >
-          <Route path="user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-          <Route path="user-management/:userId" element={<ProtectedRoute><UserTable /></ProtectedRoute>} />
-          <Route path="video-management" element={<ProtectedRoute><VideoManagement /></ProtectedRoute>} />
-          <Route path="video-management/:id" element={<ProtectedRoute><VideoManagement /></ProtectedRoute>} />
-          <Route path="addUser" element={<ProtectedRoute><AddUser /></ProtectedRoute>} />
-          <Route path="uploadVideo" element={<ProtectedRoute><UploadVideo /></ProtectedRoute>} />
-          <Route path="uploadThumbnail" element={<ProtectedRoute><UploadThumbnail /></ProtectedRoute>} />
-          <Route path="create-customer" element={<ProtectedRoute><CreateCustomer /></ProtectedRoute>} />
+        {/* Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route
+            path="user-management"
+            element={
+              <ProtectedRoute>
+                <UserManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="user-management/:userId"
+            element={
+              <ProtectedRoute>
+                <UserTable />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="video-management"
+            element={
+              <ProtectedRoute>
+                <VideoManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="video-management/:id"
+            element={
+              <ProtectedRoute>
+                <VideoManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="addUser"
+            element={
+              <ProtectedRoute>
+                <AddUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="uploadVideo"
+            element={
+              <ProtectedRoute>
+                <UploadVideo />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="uploadThumbnail"
+            element={
+              <ProtectedRoute>
+                <UploadThumbnail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="create-customer"
+            element={
+              <ProtectedRoute>
+                <CreateCustomer />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Access Denied Page */}
@@ -147,5 +219,4 @@ function App() {
     </Router>
   );
 }
-
 export default App;
