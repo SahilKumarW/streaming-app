@@ -199,14 +199,14 @@ const UploadVideo = () => {
         <Button name={loading ? "Uploading..." : "Upload to First API (File)"} onClick={handleSubmitToFirstAPI} disabled={loading} />
       </div>
 
-      <div className="mt-3 space-y-4">
+      {/* <div className="mt-3 space-y-4">
         <CustomInput placeholder="Video URL" value={videoURL} onChange={(e) => setVideoURL(e.target.value)} />
         <CustomInput placeholder="Filename" value={filename} onChange={(e) => setFilename(e.target.value)} />
       </div>
 
       <div className="mt-3">
         <Button name={loading ? "Uploading..." : "Upload to Second API (URL)"} onClick={handleSubmitToSecondAPI} disabled={loading} />
-      </div>
+      </div> */}
 
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick draggable pauseOnHover />
     </div>

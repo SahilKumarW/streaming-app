@@ -63,7 +63,7 @@ const Movies = () => {
         button1Action={handleWatchNow}
         button2Action={handleAddToWatchlist}
       />
-      <div className="px-8 md:px-16 lg:px-32">
+      {/* <div className="px-8 md:px-16 lg:px-32">
         <h2 className="text-white text-xl md:text-1xl lg:text-2xl font-bold mb-4">
           Story Line
         </h2>
@@ -71,7 +71,7 @@ const Movies = () => {
           "Fields of Destiny" is a gripping tale of heroism and self-discovery. Set in a fantastical world, it follows the journey of a young warrior who must overcome personal demons to save their homeland. With breathtaking visuals and a powerful storyline, this movie keeps you on the edge of your seat until the very end.
           <span className="text-blue-500 cursor-pointer hover:underline">...more</span>
         </p>
-      </div>
+      </div> */}
       <div className="px-8 md:px-16 lg:px-32 mt-8">
         <ScrollableRow
           title="Top Rated Movies"

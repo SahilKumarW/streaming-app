@@ -1,21 +1,25 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-
-// Helper function to check if the user is an admin
-const isAdmin = () => {
-    const user = localStorage.getItem('role'); // Get user data from localStorage
-    return user?.role === "admin" || "Admin"; // Check if the role is admin
-};
+import { toast } from "react-toastify";
 
 const ProtectedRoute = ({ children }) => {
+    const token = localStorage.getItem("token");
+    const userRole = localStorage.getItem("role"); // Retrieve role from localStorage
     const location = useLocation();
 
-    if (!isAdmin()) {
-        // If the user isn't an admin, redirect them to access-denied page
-        return <Navigate to="/access-denied" state={{ from: location }} />;
+    if (!token) {
+        // If the user is not logged in, restrict all routes and redirect to login
+        toast.error("Please log in first!");
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    return children; // Allow access if user is admin
+    if (location.pathname.startsWith("/dashboard") && userRole !== "Admin") {
+        // If logged in but not an admin, restrict dashboard access
+        toast.error("Access denied. Admins only!");
+        return <Navigate to="/access-denied" state={{ from: window.location.pathname }} />;
+    }
+
+    return children; // Allow access if checks pass
 };
 
 export default ProtectedRoute;

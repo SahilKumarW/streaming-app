@@ -1,27 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";  // Import useNavigate instead of useHistory
-import VideoService from '../api/videoService';  // Assuming this contains the getVideoById function
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate instead of useHistory
+import VideoService from "../api/videoService"; // Assuming this contains the getVideoById function
+import VideoPlayer from "../pages/VideoPlayer";
 
-const VideoTable = ({ videos = [], onEdit, onDelete }) => {
+const VideoTable = ({ videos = [] }) => {
     const { videoId } = useParams(); // Get the videoId from URL
     const [searchTerm, setSearchTerm] = React.useState("");
     const [error, setError] = React.useState(null);
-    const [selectedVideo, setSelectedVideo] = useState(null);  // Store the selected video
-    const navigate = useNavigate();  // useNavigate for navigation instead of useHistory
+    const [selectedVideo, setSelectedVideo] = useState(null); // Store the selected video
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+    const [videoUrl, setVideoUrl] = useState("");
+    const [currentVideoId, setCurrentVideoId] = useState(null); // Define currentVideoId state
+    const [watchDuration, setWatchDuration] = useState(0);
+    const navigate = useNavigate(); // useNavigate for navigation instead of useHistory
 
-    // Log the videos list when the component mounts
-    useEffect(() => {
-        console.log("Videos List:", videos);
-    }, [videos]);
+    const userId = localStorage.getItem("userId"); // If userId is stored in localStorage
+
+    const videoRef = useRef(null);
 
     useEffect(() => {
         if (videoId) {
             // Fetch video details if videoId is in the URL
             const fetchVideo = async () => {
                 try {
+                    console.log("Fetching video details for videoId:", videoId);
                     const video = await VideoService.getVideoById(videoId);
-                    setSelectedVideo(video);  // Set selected video from the API response
+                    console.log("Fetched video details:", video);
+                    setSelectedVideo(video); // Set selected video from the API response
                 } catch (err) {
+                    console.error("Error fetching video details:", err);
                     setError("Video not found.");
                 }
             };
@@ -29,6 +36,64 @@ const VideoTable = ({ videos = [], onEdit, onDelete }) => {
             fetchVideo();
         }
     }, [videoId]);
+
+    // Handle play video
+    const handlePlay = async (video) => {
+        if (video.url) {
+            setVideoUrl(video.url);
+            setIsVideoModalOpen(true);
+            setCurrentVideoId(video.uuid);
+            fetchWatchDuration(video.uuid); // Fetch user's watch history before starting
+
+            const watchHistoryData = {
+                id: video.uuid,
+                userId: userId,
+                videoId: video.uuid,
+                vedioName: video.name,
+                watchedOn: new Date().toISOString(),
+                watchDuration: 0,
+                isCompleted: false,
+            };
+
+            if (!userId || !video.uuid || !video.name) {
+                toast.error("Failed to record watch history. Missing required data.");
+                return;
+            }
+
+            try {
+                await VideoService.watchHistoryAdd(watchHistoryData);
+            } catch (error) {
+                toast.error("Failed to record watch history.");
+            }
+        } else {
+            toast.error("No video URL found for this video.");
+        }
+    };
+
+    // Fetch watch duration from user's history
+    const fetchWatchDuration = async (videoId) => {
+        if (!userId || !videoId) return;
+
+        try {
+            const response = await VideoService.getUserWatchHistory(userId);
+            const watchHistory = response?.data || [];
+            const videoHistory = watchHistory.find((item) => item.videoId === videoId);
+
+            if (videoHistory) {
+                setWatchDuration(videoHistory.watchDuration); // Set watch duration if available
+            } else {
+                setWatchDuration(0); // If no history, start from 0
+            }
+        } catch (error) {
+            console.error("Failed to fetch watch history:", error);
+        }
+    };
+
+    // Handle modal close
+    const handleCloseModal = () => {
+        setIsVideoModalOpen(false);
+        setVideoUrl("");
+    };
 
     const handleSearch = (event) => {
         debouncedSearch(event.target.value);
@@ -56,9 +121,6 @@ const VideoTable = ({ videos = [], onEdit, onDelete }) => {
             video.genre?.toLowerCase().includes(searchTerm.toLowerCase())
         )
         : [];
-
-    // Log filteredVideos after it's defined
-    console.log("Filtered Videos:", filteredVideos);
 
     return (
         <div className="overflow-x-auto">
@@ -101,58 +163,45 @@ const VideoTable = ({ videos = [], onEdit, onDelete }) => {
                                 </td>
                             </tr>
                         ) : (
-                            filteredVideos.map((video) => {
-                                // If the videoId matches the current video, mark it as selected and show detailed row
-                                const isSelected = video.uuid === videoId;
-
-                                return (
-                                    <tr key={video.uuid} className={isSelected ? "bg-gray-800" : ""}>
-                                        <td className="p-4">
-                                            <a href={`/video/${video.uuid}`} className="text-blue-500">
-                                                {video.name}
-                                            </a>
-                                        </td>
-                                        <td className="p-4">{video.category}</td>
-                                        <td className="p-4">{video.genre}</td>
-                                        <td className="p-4">
-                                            <button
-                                                className="text-blue-500 mr-2"
-                                                onClick={() => {
-                                                    console.log("Editing video:", video);
-                                                    onEdit(video);
-                                                }}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                className="text-red-500"
-                                                onClick={() => {
-                                                    if (window.confirm(`Are you sure you want to delete ${video.name}?`)) {
-                                                        onDelete(video.uuid);
-                                                    }
-                                                }}
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })
+                            filteredVideos.map((video) => (
+                                <tr key={video.uuid}>
+                                    <td className="p-4">{video.name}</td>
+                                    <td className="p-4">{video.category}</td>
+                                    <td className="p-4">{video.genre}</td>
+                                    <td className="p-4">
+                                        <button
+                                            className="text-blue-500"
+                                            onClick={() => handlePlay(video)}
+                                        >
+                                            Play Video
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
                         )}
                     </tbody>
                 </table>
             </div>
-
-            {/* Render the selected video details if a video is selected */}
-            {selectedVideo && (
-                <div className="mt-4 bg-gray-800 p-4 rounded-lg">
-                    <h3 className="text-white text-xl font-semibold">Selected Video</h3>
-                    <p className="text-white">Name: {selectedVideo.name}</p>
-                    <p className="text-white">Category: {selectedVideo.category}</p>
-                    <p className="text-white">Genre: {selectedVideo.genre}</p>
+            {isVideoModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+                    <div className="bg-white p-4 rounded-lg relative w-[75%] h-[75%] max-w-[1200px] max-h-[800px] overflow-hidden">
+                        <button
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2"
+                            onClick={handleCloseModal}
+                        >
+                            Close
+                        </button>
+                        <VideoPlayer
+                            src={videoUrl}
+                            startAt={watchDuration} // Pass the watch duration to the VideoPlayer
+                            onClose={handleCloseModal}
+                            videoRef={videoRef}
+                        />
+                    </div>
                 </div>
             )}
         </div>
+
     );
 };
 

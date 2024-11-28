@@ -12,7 +12,7 @@ const AccessDenied = () => {
             <AccessDeniedHeading>Access Denied</AccessDeniedHeading>
             <AccessDeniedMessage>You do not have permission to access this page.</AccessDeniedMessage>
             <AccessDeniedBack>
-                Go back to <StyledLink to={from}>Home</StyledLink>.
+                Go back to <StyledLink to="/home">Home</StyledLink>.
             </AccessDeniedBack>
         </AccessDeniedContainer>
     );

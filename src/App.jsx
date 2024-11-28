@@ -115,7 +115,7 @@ function App() {
     console.log("Movies state updated:", movies); // Debugging state updates
   }, [movies]);
 
-  <Route path="/search-results" element={<SearchResults movies={movies} />} />
+  <Route path="/search-results" element={<ProtectedRoute><SearchResults movies={movies} /></ProtectedRoute>} />
 
   return (
     <Router>
@@ -125,18 +125,18 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/reset" element={<Reset />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/complete-profile" element={<CompleteProfile />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/account-settings" element={<AccountSettings />} />
-        <Route path="/subscription" element={<Subscription />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+        <Route path="/verify-email" element={<ProtectedRoute><VerifyEmail /></ProtectedRoute>} />
+        <Route path="/account-settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
+        <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/" element={<Login />} />
-        <Route path="/movies" element={<Movies />} />
-        <Route path="/tvseries" element={<TvSeries />} />
-        <Route path="/mylist" element={<MyList />} />
-        <Route path="/player" element={<VideoPlayer />} />
-        <Route path="/videos/:videoId" element={<VideoPlayer />} />
-        <Route path="/search-results" element={<SearchResults movies={movies} />} />
+        <Route path="/movies" element={<ProtectedRoute><Movies /></ProtectedRoute>} />
+        <Route path="/tvseries" element={<ProtectedRoute><TvSeries /></ProtectedRoute>} />
+        <Route path="/mylist" element={<ProtectedRoute><MyList /></ProtectedRoute>} />
+        <Route path="/player" element={<ProtectedRoute><VideoPlayer /></ProtectedRoute>} />
+        <Route path="/videos/:videoId" element={<ProtectedRoute><VideoPlayer /></ProtectedRoute>} />
+        <Route path="/search-results" element={<ProtectedRoute><SearchResults movies={movies} /></ProtectedRoute>} />
 
         {/* Protected Routes */}
         <Route

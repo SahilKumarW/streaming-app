@@ -23,14 +23,31 @@ const Navbar = ({ setMovies }) => {
         category: searchByCategory,
       });
 
-      console.log("Search Results from API:", results); // Log API results
       if (Array.isArray(results) && results.length > 0) {
-        setMovies(results); // Update state in parent
-        console.log("Movies state updated:", results); // Confirm state update
-        navigate("/search-results", { state: { movies: results } }); // Navigate to search results page
+        setMovies(results); // Update the results state in the parent
+        navigate("/search-results", {
+          state: {
+            movies: results, // Passing the search results
+            searchQuery: { searchByName, searchByCategory, searchByGenre },
+          },
+          key: new Date().toString(), // This will force the page to reload
+        });
       } else {
-        console.log("No search results found.");
+        setMovies([]); // Clear results if no match found
+        navigate("/search-results", {
+          state: {
+            movies: [],
+            searchQuery: { searchByName, searchByCategory, searchByGenre },
+          },
+          key: new Date().toString(), // This will force the page to reload
+        });
       }
+
+      // Close the search bar and clear the input fields after search
+      setShowSearchInputs(false); // Close the search bar
+      setSearchByName(""); // Clear the name field
+      setSearchByCategory(""); // Clear the category field
+      setSearchByGenre(""); // Clear the genre field
     } catch (error) {
       console.error("Error during search:", error);
     }

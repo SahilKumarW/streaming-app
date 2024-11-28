@@ -4,7 +4,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import MovieCard from "./MovieCard";
 import VideoService from "../api/videoService"; // Ensure VideoService is imported
 
-const ScrollableRow = ({ title, movies, loading }) => {
+const ScrollableRow = ({ title, movies = [], loading }) => {
   const scrollRef = useRef(null);
   const [playingVideo, setPlayingVideo] = useState(null); // Store selected video details
 

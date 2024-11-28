@@ -269,7 +269,7 @@ const VideoService = {
     getVideoById: async (videoId) => {
         const { token } = getAuthData();
         try {
-            const response = await get(`${BASE_URL}/get-vedio-by-id?id=${videoId}`, {
+            const response = await get(`${BASE_URL}/get-vedio-by-id/${videoId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
