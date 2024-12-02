@@ -284,6 +284,18 @@ const VideoService = {
         }
     },
 
+    editVideoMetadata: async (videoId, formData) => {
+        const { token } = getAuthData();
+        const url = `${BASE_URL}/UpdateVideoMetaData/${videoId}`;
+
+        return await post(url, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
+
     searchVideos: async ({ name, genre, category }) => {
         const { token } = getAuthData(); // Retrieve the auth token
         try {

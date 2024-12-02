@@ -1,49 +1,46 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate instead of useHistory
-import VideoService from "../api/videoService"; // Assuming this contains the getVideoById function
+import { useParams, useNavigate } from "react-router-dom";
+import VideoService from "../api/videoService";
 import VideoPlayer from "../pages/VideoPlayer";
+import EditVideoModal from "../Modals/EditVideoModal";
+import { toast } from "react-toastify";
 
 const VideoTable = ({ videos = [] }) => {
-    const { videoId } = useParams(); // Get the videoId from URL
-    const [searchTerm, setSearchTerm] = React.useState("");
-    const [error, setError] = React.useState(null);
-    const [selectedVideo, setSelectedVideo] = useState(null); // Store the selected video
+    const { videoId } = useParams();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [error, setError] = useState(null);
+    const [selectedVideo, setSelectedVideo] = useState(null);
     const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [videoUrl, setVideoUrl] = useState("");
-    const [currentVideoId, setCurrentVideoId] = useState(null); // Define currentVideoId state
+    const [currentVideoId, setCurrentVideoId] = useState(null);
     const [watchDuration, setWatchDuration] = useState(0);
-    const navigate = useNavigate(); // useNavigate for navigation instead of useHistory
+    const [videoList, setVideoList] = useState(videos);  // Track videos state locally
+    const navigate = useNavigate();
 
-    const userId = localStorage.getItem("userId"); // If userId is stored in localStorage
-
+    const userId = localStorage.getItem("userId");
     const videoRef = useRef(null);
 
     useEffect(() => {
         if (videoId) {
-            // Fetch video details if videoId is in the URL
             const fetchVideo = async () => {
                 try {
-                    console.log("Fetching video details for videoId:", videoId);
                     const video = await VideoService.getVideoById(videoId);
-                    console.log("Fetched video details:", video);
-                    setSelectedVideo(video); // Set selected video from the API response
+                    setSelectedVideo(video);
                 } catch (err) {
-                    console.error("Error fetching video details:", err);
                     setError("Video not found.");
                 }
             };
-
             fetchVideo();
         }
     }, [videoId]);
 
-    // Handle play video
     const handlePlay = async (video) => {
         if (video.url) {
             setVideoUrl(video.url);
             setIsVideoModalOpen(true);
             setCurrentVideoId(video.uuid);
-            fetchWatchDuration(video.uuid); // Fetch user's watch history before starting
+            fetchWatchDuration(video.uuid);
 
             const watchHistoryData = {
                 id: video.uuid,
@@ -62,7 +59,7 @@ const VideoTable = ({ videos = [] }) => {
 
             try {
                 await VideoService.watchHistoryAdd(watchHistoryData);
-            } catch (error) {
+            } catch {
                 toast.error("Failed to record watch history.");
             }
         } else {
@@ -70,7 +67,11 @@ const VideoTable = ({ videos = [] }) => {
         }
     };
 
-    // Fetch watch duration from user's history
+    const handleEdit = (video) => {
+        setSelectedVideo(video);
+        setIsEditModalOpen(true);
+    };
+
     const fetchWatchDuration = async (videoId) => {
         if (!userId || !videoId) return;
 
@@ -80,47 +81,49 @@ const VideoTable = ({ videos = [] }) => {
             const videoHistory = watchHistory.find((item) => item.videoId === videoId);
 
             if (videoHistory) {
-                setWatchDuration(videoHistory.watchDuration); // Set watch duration if available
+                setWatchDuration(videoHistory.watchDuration);
             } else {
-                setWatchDuration(0); // If no history, start from 0
+                setWatchDuration(0);
             }
-        } catch (error) {
-            console.error("Failed to fetch watch history:", error);
+        } catch {
+            console.error("Failed to fetch watch history.");
         }
     };
 
-    // Handle modal close
     const handleCloseModal = () => {
         setIsVideoModalOpen(false);
         setVideoUrl("");
     };
 
     const handleSearch = (event) => {
-        debouncedSearch(event.target.value);
+        setSearchTerm(event.target.value.trim());
     };
 
-    // Debounce the search term to optimize performance
-    const debounce = (fn, delay) => {
-        let timeoutId;
-        return (...args) => {
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-            timeoutId = setTimeout(() => {
-                fn(...args);
-            }, delay);
-        };
-    };
-
-    const debouncedSearch = debounce((value) => setSearchTerm(value), 300);
-
-    const filteredVideos = Array.isArray(videos)
-        ? videos.filter((video) =>
+    const filteredVideos = Array.isArray(videoList)
+        ? videoList.filter((video) =>
             video.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             video.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             video.genre?.toLowerCase().includes(searchTerm.toLowerCase())
         )
         : [];
+
+    const handleSaveEdit = async (updatedVideo) => {
+        try {
+            // await VideoService.editVideoMetadata(updatedVideo);
+            toast.success("Video updated successfully!");
+            setIsEditModalOpen(false);
+
+            // Update the video list locally
+            setVideoList((prevVideos) =>
+                prevVideos.map((video) =>
+                    video.uuid === updatedVideo.uuid ? updatedVideo : video
+                )
+            );
+        } catch (err) {
+            toast.error("Failed to update video.");
+            console.error("Error updating video:", err);
+        }
+    };
 
     return (
         <div className="overflow-x-auto">
@@ -157,7 +160,10 @@ const VideoTable = ({ videos = [] }) => {
                             <tr>
                                 <td colSpan="4" className="p-4 text-center">
                                     No videos found.{" "}
-                                    <button className="text-teal-500" onClick={() => navigate("/dashboard/uploadVideo")}>
+                                    <button
+                                        className="text-teal-500"
+                                        onClick={() => navigate("/dashboard/uploadVideo")}
+                                    >
                                         Add Video
                                     </button>
                                 </td>
@@ -168,12 +174,18 @@ const VideoTable = ({ videos = [] }) => {
                                     <td className="p-4">{video.name}</td>
                                     <td className="p-4">{video.category}</td>
                                     <td className="p-4">{video.genre}</td>
-                                    <td className="p-4">
+                                    <td className="p-4 space-x-2">
                                         <button
                                             className="text-blue-500"
                                             onClick={() => handlePlay(video)}
                                         >
-                                            Play Video
+                                            Play
+                                        </button>
+                                        <button
+                                            className="text-green-500"
+                                            onClick={() => handleEdit(video)}
+                                        >
+                                            Edit
                                         </button>
                                     </td>
                                 </tr>
@@ -193,15 +205,21 @@ const VideoTable = ({ videos = [] }) => {
                         </button>
                         <VideoPlayer
                             src={videoUrl}
-                            startAt={watchDuration} // Pass the watch duration to the VideoPlayer
+                            startAt={watchDuration}
                             onClose={handleCloseModal}
                             videoRef={videoRef}
                         />
                     </div>
                 </div>
             )}
+            {isEditModalOpen && selectedVideo && (
+                <EditVideoModal
+                    video={selectedVideo}
+                    onSave={handleSaveEdit}
+                    onClose={() => setIsEditModalOpen(false)}
+                />
+            )}
         </div>
-
     );
 };
 
