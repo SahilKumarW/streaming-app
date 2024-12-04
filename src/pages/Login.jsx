@@ -20,7 +20,8 @@ const Login = ({ onLogin }) => {
 
         // Check for successful login and access token
         if (response.data.apiCode === 0 && response.data.data) {
-          const { token, id: userId, role } = response.data.data; // Extract token, user ID, and role
+          console.log("Response data:", response.data);
+          const { token, id: userId, role, name: userName } = response.data.data; // Extract token, user ID, and role
           console.log("Extracted token:", token); // Log extracted token
 
           if (token) {
@@ -28,11 +29,13 @@ const Login = ({ onLogin }) => {
             localStorage.setItem('token', token);
             localStorage.setItem('userId', userId);
             localStorage.setItem('role', role);
+            localStorage.setItem('userName', userName);
 
             toast.success("User Successfully Logged In");
             console.log(localStorage.getItem('token'));
             console.log(localStorage.getItem('userId'));
             console.log(localStorage.getItem('role'));
+            console.log(localStorage.getItem('userName'));
 
             // Navigate to home page
             navigate("/home");

@@ -10,6 +10,15 @@ const VideoManagement = () => {
     const { id } = useParams();  // Get the video ID from the URL
     const [videos, setVideos] = useState([]); // State for the list of videos
     const [video, setVideo] = useState(null); // State for a single video
+    const [userName, setUserName] = useState("");
+
+    useEffect(() => {
+        // Fetch the logged-in user's name from local storage
+        const storedUserName = localStorage.getItem("userName");
+        if (storedUserName) {
+            setUserName(storedUserName); // Set the user name in state
+        }
+    }, []);
 
     // Fetch video or list of videos based on URL parameter (id)
     useEffect(() => {
@@ -33,7 +42,7 @@ const VideoManagement = () => {
 
     const fetchVideoList = async () => {
         try {
-            const response = await VideoService.showVideoList();
+            const response = await VideoService.getAllVideos();
             setVideos(response.data); // Set the list of videos
         } catch (error) {
             console.error("Error fetching video list:", error);
@@ -46,24 +55,32 @@ const VideoManagement = () => {
         // Implement thumbnail upload logic here
     };
 
+    // Logout function
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate("/login");  // Navigate to login page after logout
+    };
+
     return (
         <div className="right_section bg-black text-white min-h-screen">
-            <div className="flex justify-between items-center p-10">
+            {/* First fixed header */}
+            <div className="sticky top-0 bg-black text-white z-10 flex justify-between items-center p-4 px-6">
                 <p className="text-2xl font-semibold">Administration</p>
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-2">
                         <img src={tom} alt="User Avatar" className="w-10 h-10 rounded-full" />
-                        <p>Tom Cruise</p>
+                        <p>{userName || "Guest"}</p> {/* Display the username */}
                     </div>
-                    <div className="flex items-center cursor-pointer gap-2">
+                    <div className="flex items-center cursor-pointer gap-2" onClick={handleLogout}>
                         <p>Logout</p>
                         <i className="ri-logout-circle-r-line mr-1"></i>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-stone-800 justify-between items-center mb-8 px-8 py-8">
-                <div className="flex justify-between items-center mb-6">
+            {/* Second fixed header */}
+            <div className="sticky top-16 bg-stone-800 z-10 justify-between items-center py-4 px-6">
+                <div className="flex justify-between items-center w-full">
                     <div>
                         <p className="text-xl font-semibold">Manage Videos</p>
                         <p className="text-gray-400">
@@ -84,14 +101,15 @@ const VideoManagement = () => {
                         />
                     </div>
                 </div>
-                <div className="flex items-end pb-0">
+                {/* <div className="flex items-end pb-0">
                     <p className="text-lg font-semibold cursor-pointer text-white underline text-teal-500">
                         Videos
                     </p>
-                </div>
+                </div> */}
             </div>
 
-            <div className="p-6 rounded-lg">
+            {/* Scrollable content */}
+            <div className="p-6 rounded-lg overflow-y-auto" style={{ maxHeight: 'calc(100vh - 192px)' }}>
                 <div className="overflow-y-auto max-h-96 rounded-lg">
                     {/* Display single video if ID is present, otherwise display all videos */}
                     {id && video ? (

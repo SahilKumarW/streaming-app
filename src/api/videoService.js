@@ -326,6 +326,19 @@ const VideoService = {
         }
     },
 
+    // Get all videos
+    getAllVideos: async () => {
+        const { token } = getAuthData();
+        const url = `${BASE_URL}/get-all-videos`;
+        return await get(url, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Include Authorization header
+            },
+        }).catch((error) => {
+            console.error("Error fetching video list:", error.response ? error.response.data : error.message);
+            throw error; // Re-throw the error to handle it later
+        });
+    },
     // Show video list
     showVideoList: async () => {
         const { token, userId } = getAuthData(); // Get userId from local storage
