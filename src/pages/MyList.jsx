@@ -49,6 +49,32 @@ const MyList = () => {
     }
   };
 
+  const handleFavoriteToggle = async (movieId) => {
+    try {
+      const updatedMovies = myListMovies.map((movie) => {
+        if (movie.uuid === movieId) {
+          // Toggle the favorited state
+          movie.isFavorited = !movie.isFavorited;
+        }
+        return movie;
+      });
+
+      setMyListMovies(updatedMovies); // Update state with toggled favorites
+
+      const userId = localStorage.getItem("userId");
+      if (updatedMovies.find((movie) => movie.uuid === movieId).isFavorited) {
+        await VideoService.addFavoriteVideo({ videoId: movieId, userId });
+        toast.success("Added to favorites!");
+      } else {
+        await VideoService.removeFavoriteVideo({ videoId: movieId, userId });
+        toast.info("Removed from favorites.");
+      }
+    } catch (error) {
+      toast.error("Failed to update favorites. Please try again.");
+      console.error(error);
+    }
+  };
+
   // Handle video play and update watch history
   const handlePlayVideo = async (movie) => {
     try {
@@ -143,10 +169,11 @@ const MyList = () => {
               <MovieCard
                 key={movie.uuid}
                 movie={movie}
-                averageRating={movie.averageRating} // Pass the average rating to the MovieCard
+                averageRating={movie.averageRating} // Pass the average rating
                 section="myList"
-                playVideo={() => handlePlayVideo(movie)} // Pass handlePlayVideo as playVideo function
-                isFavorited={movie.isFavorited} // Pass the isFavorited prop to MovieCard
+                playVideo={() => handlePlayVideo(movie)}
+                isFavorited={movie.isFavorited} // Pass favorited state
+                onFavoriteToggle={() => handleFavoriteToggle(movie.uuid)} // Toggle favorite state
               />
             ))
           ) : (

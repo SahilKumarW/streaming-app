@@ -14,8 +14,15 @@ const UserManagement = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [activeTab, setActiveTab] = useState("users");
+    const [userName, setUserName] = useState("");
 
     useEffect(() => {
+        // Fetch the logged-in user's name from local storage
+        const storedUserName = localStorage.getItem("userName");
+        if (storedUserName) {
+            setUserName(storedUserName); // Set the user name in state
+        }
+
         fetchUsers();
     }, []);
 
@@ -71,29 +78,36 @@ const UserManagement = () => {
         }
     };
 
+    // Logout function
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate("/login");  // Navigate to login page after logout
+    };
+
     const handleBulkAction = () => console.log("Bulk action triggered");
     const handleBlockUser = () => console.log("Block user triggered");
 
     return (
-        <div className="right_section bg-black text-white min-h-screen">
-            <div className="flex justify-between items-center p-10">
+        <div className="right_section bg-black text-white min-h-screen flex flex-col">
+            {/* First fixed header */}
+            <div className="sticky top-0 bg-black text-white z-10 flex justify-between items-center p-4 px-6">
                 <p className="text-2xl font-semibold">Administration</p>
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-2">
                         <img src={tom} alt="User Avatar" className="w-10 h-10 rounded-full" />
-                        <p>Tom Cruise</p>
+                        <p>{userName || "Guest"}</p> {/* Display the username */}
                     </div>
-                    <div className="flex items-center cursor-pointer gap-2">
+                    <div className="flex items-center cursor-pointer gap-2" onClick={handleLogout}>
                         <p>Logout</p>
                         <i className="ri-logout-circle-r-line mr-1"></i>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-stone-800 justify-between items-center mb-8 px-8 py-8">
-                <div className="flex justify-between items-center mb-6">
+            <div className="sticky top-16 bg-stone-800 z-10 flex justify-between items-center py-4 px-6 mb-16"> {/* Add margin bottom here */}
+                <div className="flex justify-between items-center w-full">
                     <div>
-                        <p className="text-xl font-semibold">Manage User</p>
+                        <p className="text-xl font-semibold">Manage Users</p>
                         <p className="text-gray-400">
                             Administer and oversee user accounts and privileges within the platform.
                         </p>
@@ -104,17 +118,10 @@ const UserManagement = () => {
                         onClick={() => navigate("/dashboard/addUser")}
                     />
                 </div>
-                <div className="flex items-end pb-0">
-                    <p
-                        className={`text-lg font-semibold cursor-pointer text-white ${activeTab === "users" ? "underline text-teal-500" : ""}`}
-                        onClick={() => setActiveTab("users")}
-                    >
-                        Users
-                    </p>
-                </div>
             </div>
 
-            <div className="p-6 rounded-lg">
+            {/* Scrollable content */}
+            <div className="flex-grow p-6 rounded-lg overflow-y-auto">
                 {activeTab === "users" && (
                     <>
                         {loading ? (
