@@ -21,7 +21,7 @@ import MyList from "./pages/MyList";
 import VideoPlayer from "./pages/VideoPlayer";
 import { post } from "./api/axios";
 const apiUrl = import.meta.env.VITE_API_URL;
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import Dashboard from "./pages/Dashboard";
 import AddUser from "./pages/AddUser";
@@ -119,6 +119,7 @@ function App() {
 
   return (
     <Router>
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
       {/* <Navbar /> */}
       <Routes>
         <Route path="/login" element={<Login />} />
