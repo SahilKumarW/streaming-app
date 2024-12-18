@@ -3,6 +3,7 @@ import HeroSection from "../components/HeroSection";
 import ScrollableRow from "../components/ScrollableRow";
 import VideoService from "../api/videoService";
 import homeImage from "../assets/home.png";
+import noThumbnailImage from "../assets/no thumbnail.png"; // Placeholder image
 import Footer from "../components/Footer";
 import VideoPlayer from "./VideoPlayer"; // Import VideoPlayer
 import { getAuthData } from "../api/axios";
@@ -40,10 +41,17 @@ const Home = () => {
           VideoService.getTopRatedTvShows(),
         ]);
 
+        console.log(`Top TV Shows Response: ${topTvShowsResponse}`);
+
         setRecommendedMoviesList(allVideos.data || []);
         setTopRatedMoviesList(topRatedResponse.data || []);
-        setTopTvShowList(topTvShowsResponse);
-
+        setTopTvShowList(
+          topTvShowsResponse.map(show => ({
+            ...show,
+            name: show.tvSeriesName, // Use tvSeriesName as name
+            thumbnailUrl: show.thumbnailUrl || noThumbnailImage, // Use placeholder if no thumbnail
+          }))
+        );
         setContinueWatchingList(
           watchHistoryResponse.data
             .filter((item) => {

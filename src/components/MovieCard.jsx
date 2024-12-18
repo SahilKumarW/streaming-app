@@ -66,6 +66,10 @@ const MovieCard = ({ movie, section }) => {
 
   // Handle play action
   const handlePlay = async () => {
+    console.log("Movie Object:", movie);
+    console.log("Card clicked, UUID:", movie.uuid); // Log the UUID of the card being clicked
+    console.log(`Card clicked from section: ${section}`); // Log section info
+
     if (movie.url) {
       setVideoUrl(movie.url);
       setIsVideoModalOpen(true);

@@ -3,6 +3,7 @@ import HeroSection from "../components/HeroSection";
 import ScrollableRow from "../components/ScrollableRow";
 import VideoService from "../api/videoService";
 import Footer from "../components/Footer";
+import noThumbnailImage from "../assets/no thumbnail.png"
 import tvSeriesImage from "../assets/TvSeries.png";
 import tvSeriesEpisodeImage from "../assets/TvSeries.png";
 import { getAuthData } from "../api/axios";
@@ -39,10 +40,24 @@ const TvSeries = () => {
         const allVideos = Array.isArray(allVideosResponse.data) ? allVideosResponse.data : [];
 
         setRecommendedMoviesList(
-        allVideos.filter(video => video.category === "TVShows")
-      );
+          allVideos.filter(video => video.category === "TVShows")
+        );
 
-        setTopRatedTvShowList(topRatedShowsResponse);
+        setTopRatedTvShowList(
+          topRatedShowsResponse.map(show => ({
+            ...show,
+            name: show.tvSeriesName,  // Ensure the name is set correctly
+            thumbnailUrl: show.thumbnailUrl || noThumbnailImage,
+            seasons: show.seasons.map(season => ({
+              ...season,
+              episodes: season.episodes.map(episode => ({
+                ...episode,
+                thumbnailUrl: show.thumbnailUrl ? show.thumbnailUrl : noThumbnailImage,  // Fallback for episode thumbnail
+                videoUrl: episode.videoData.url,
+              })),
+            })),
+          }))
+        );
 
         // Process continue watching list
         setContinueWatchingList(
@@ -92,6 +107,11 @@ const TvSeries = () => {
   const handleCardClick = (movie) => {
     // Handle card click logic, similar to the Home page
     console.log(`Movie: ${movie.name}, Watch Duration: ${movie.watchDuration}`);
+    if (movie.uuid) {
+      console.log(`UUID: ${movie.uuid}, Name: ${movie.name}`);
+    } else {
+      console.warn("UUID not available for this movie.");
+    }
   };
 
   return (
@@ -151,9 +171,11 @@ const TvSeries = () => {
         <ScrollableRow
           title="Top Rated TV Shows"
           loading={loading.topRated}
-          movies={topRatedTvShowList.map((movie) => ({
-            ...movie,
-            onClick: () => handleCardClick(movie),
+          movies={topRatedTvShowList.map((tvShow) => ({
+            ...tvShow,
+            onClick: () => handleCardClick(tvShow),
+            name: tvShow.name,  // Ensure the name is passed correctly
+            thumbnailUrl: tvShow.thumbnailUrl,  // Pass the thumbnail URL
           }))}
         />
       </div>
